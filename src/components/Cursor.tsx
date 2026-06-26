@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import "./Cursor.css";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type CursorState = "default" | "hover" | "view" | "drag";
 
@@ -14,6 +15,7 @@ export default function Cursor({ enabled = true }: CursorProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
   const dotRef = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   // Read state directly from the DOM — never stored in React state during
   // the high-frequency mousemove path. Only commit React state when the
@@ -50,6 +52,10 @@ export default function Cursor({ enabled = true }: CursorProps) {
     const onMove = (e: MouseEvent) => {
       target.x = e.clientX;
       target.y = e.clientY;
+      // Bump the idle-pause clock so the rAF loop stays awake while the
+      // user is moving. The `onMoveWake` listener below also bumps this,
+      // but doing it here avoids one extra listener registration.
+      lastMoveAt = performance.now();
 
       // Walk up from the event target to find a data-cursor attribute.
       // We keep a small cache so once a row's element is identified we
@@ -90,7 +96,22 @@ export default function Cursor({ enabled = true }: CursorProps) {
     host.setAttribute("data-hidden", "true");
 
     let raf = 0;
+    // Idle-pause: the rAF loop only runs while the user is actively moving
+    // the cursor or the ring hasn't yet caught up to the target. After
+    // ~1.5s of no movement, we stop scheduling frames until the next
+    // mousemove. This is the dominant CPU win on long-running sessions.
+    let lastMoveAt = performance.now();
+    const idleThresholdMs = 1500;
+
     const tick = () => {
+      const settledX = Math.abs(target.x - current.x) < 0.5;
+      const settledY = Math.abs(target.y - current.y) < 0.5;
+      const idle = performance.now() - lastMoveAt > idleThresholdMs;
+      if (settledX && settledY && idle) {
+        // Done — drop the loop. Next mousemove will re-kick it.
+        raf = 0;
+        return;
+      }
       // Lerp ring toward cursor at ~22% per frame at 60fps — gives a
       // soft trailing motion without feeling laggy. Dot snaps exactly.
       current.x += (target.x - current.x) * 0.22;
@@ -99,18 +120,59 @@ export default function Cursor({ enabled = true }: CursorProps) {
       dot.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
       raf = requestAnimationFrame(tick);
     };
+
+    const onMoveWake = () => {
+      lastMoveAt = performance.now();
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+
+    // `onMove` already runs for state updates; attach a second listener
+    // that just bumps lastMoveAt without re-walking the DOM tree.
+    window.addEventListener("mousemove", onMoveWake, { passive: true });
+
+    if (reducedMotion) {
+      // Snap cursor exactly to target — no easing, no rAF loop.
+      // Apply the latest known target to the dot's transform inline so
+      // it doesn't visually lag on first render either.
+      const snap = () => {
+        ring.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
+        dot.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
+      };
+      const snapOnMove = (e: MouseEvent) => {
+        target.x = e.clientX;
+        target.y = e.clientY;
+        snap();
+      };
+      window.addEventListener("mousemove", snapOnMove, { passive: true });
+      // Start the loop once to apply the initial frame, then bail.
+      raf = requestAnimationFrame(() => {
+        snap();
+        cancelAnimationFrame(raf);
+        raf = 0;
+      });
+      return () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mousemove", onMoveWake);
+        window.removeEventListener("mousemove", snapOnMove);
+        document.documentElement.removeEventListener("mouseenter", onEnter);
+        document.documentElement.removeEventListener("mouseleave", onLeave);
+        cancelAnimationFrame(raf);
+      };
+    }
+
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousemove", onMoveWake);
       document.documentElement.removeEventListener("mouseenter", onEnter);
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
     // We intentionally omit `state` and `label` from deps — they're
     // read via refs so the listeners stay stable for the whole session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reducedMotion]);
 
   if (!active) return null;
 

@@ -115,31 +115,56 @@ export default function TextPressure({
   }, [setSize]);
 
   useEffect(() => {
+    const title = titleRef.current;
+    const container = containerRef.current;
+    if (!title || !container) return;
+
+    // IntersectionObserver drives the rAF loop. When AUXLOOM is off-screen
+    // (footer band is below the fold for most of the page lifetime), we
+    // stop the per-frame layout reads and style writes — that's the
+    // dominant steady-state CPU cost.
     let raf = 0;
+    let visible = true;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const next = entries[0]?.isIntersecting ?? true;
+        if (next === visible) return;
+        visible = next;
+        if (next) raf = requestAnimationFrame(animate);
+      },
+      { threshold: 0 },
+    );
+    io.observe(container);
+
     const animate = () => {
+      if (visible) raf = requestAnimationFrame(animate);
+      if (!visible) return;
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
-      if (titleRef.current) {
-        const r = titleRef.current.getBoundingClientRect();
-        const maxDist = r.width / 2;
-        spansRef.current.forEach((span) => {
-          if (!span) return;
-          const sr = span.getBoundingClientRect();
-          const center = { x: sr.x + sr.width / 2, y: sr.y + sr.height / 2 };
-          const d = dist(mouseRef.current, center);
-          const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
-          const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : "0";
-          const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : "1";
-          const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
-          if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
-          if (alpha && span.style.opacity !== alphaVal) span.style.opacity = alphaVal;
-        });
+      const r = title.getBoundingClientRect();
+      const maxDist = r.width / 2;
+      const spans = spansRef.current;
+      for (let i = 0; i < spans.length; i++) {
+        const span = spans[i];
+        if (!span) continue;
+        const sr = span.getBoundingClientRect();
+        const center = { x: sr.x + sr.width / 2, y: sr.y + sr.height / 2 };
+        const d = dist(mouseRef.current, center);
+        const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
+        const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
+        const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : "0";
+        const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : "1";
+        const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+        if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
+        if (alpha && span.style.opacity !== alphaVal) span.style.opacity = alphaVal;
       }
-      raf = requestAnimationFrame(animate);
     };
-    animate();
-    return () => cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+    };
   }, [width, weight, italic, alpha]);
 
   const dynamicClassName = [className, flex ? "flex" : "", stroke ? "stroke" : ""]

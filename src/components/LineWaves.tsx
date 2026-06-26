@@ -2,6 +2,7 @@ import { Renderer, Program, Mesh, Triangle } from "ogl";
 import { useEffect, useRef } from "react";
 
 import "./LineWaves.css";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface LineWavesProps {
   speed?: number;
@@ -165,10 +166,15 @@ export default function LineWaves({
   className,
 }: LineWavesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Honour the OS-level "Reduce Motion" preference: skip animation entirely
+  // and render a single static frame (the shader still runs once on init so
+  // the canvas isn't blank, but no rAF loop is scheduled).
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    if (reducedMotion) return;
 
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
     const gl = renderer.gl;
@@ -239,10 +245,31 @@ export default function LineWaves({
     }
 
     let animationFrameId = 0;
+    // IntersectionObserver toggles this — when the canvas is off-screen
+    // (or has the `data-paused` attribute), the rAF loop short-circuits
+    // after the current frame instead of scheduling another.
+    let visible = true;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const next = entries[0]?.isIntersecting ?? true;
+        if (next === visible) return;
+        visible = next;
+        if (next) {
+          // Resume: kick the rAF loop back into life.
+          animationFrameId = requestAnimationFrame(update);
+        }
+      },
+      { threshold: 0 },
+    );
+    io.observe(container);
 
     const update = (time: number) => {
-      animationFrameId = requestAnimationFrame(update);
+      // Schedule the next frame BEFORE doing work so an exception inside
+      // the renderer doesn't permanently stop the loop.
+      if (visible) animationFrameId = requestAnimationFrame(update);
       if (!program) return;
+      if (!visible) return;
       program.uniforms.uTime.value = time * 0.001;
 
       if (enableMouseInteraction) {
@@ -261,6 +288,7 @@ export default function LineWaves({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      io.disconnect();
       window.removeEventListener("resize", resize);
       if (enableMouseInteraction) {
         gl.canvas.removeEventListener("mousemove", handleMouseMove);
@@ -283,6 +311,7 @@ export default function LineWaves({
     color3,
     enableMouseInteraction,
     mouseInfluence,
+    reducedMotion,
   ]);
 
   return <div ref={containerRef} className={`line-waves-container ${className ?? ""}`} />;

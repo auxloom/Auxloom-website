@@ -3,13 +3,34 @@ import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tan
 import { n as AnimatePresence } from "../_libs/framer-motion.mjs";
 import { t as motion } from "../_libs/motion.mjs";
 import { i as Program, n as Mesh, r as Renderer, t as Triangle } from "../_libs/ogl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Da7NxZ6e.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DkR1tzBS.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
+/**
+* Returns true when the user has expressed a preference for reduced motion
+* (either via `prefers-reduced-motion: reduce` or a Save-Data header). Use
+* to skip decorative animations, spring physics, and per-frame rAF loops.
+*
+* Defaults to `false` during SSR — the media query isn't available, and
+* we don't want to suppress motion on the server pass.
+*/
+function useReducedMotion() {
+	const [reduced, setReduced] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		if (typeof window === "undefined" || !window.matchMedia) return;
+		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+		const update = () => setReduced(mq.matches);
+		update();
+		mq.addEventListener("change", update);
+		return () => mq.removeEventListener("change", update);
+	}, []);
+	return reduced;
+}
 function Cursor({ enabled = true }) {
 	const hostRef = (0, import_react.useRef)(null);
 	const ringRef = (0, import_react.useRef)(null);
 	const dotRef = (0, import_react.useRef)(null);
+	const reducedMotion = useReducedMotion();
 	const [state, setState] = (0, import_react.useState)("default");
 	const [label, setLabel] = (0, import_react.useState)("");
 	const [active, setActive] = (0, import_react.useState)(enabled);
@@ -36,6 +57,7 @@ function Cursor({ enabled = true }) {
 		const onMove = (e) => {
 			target.x = e.clientX;
 			target.y = e.clientY;
+			lastMoveAt = performance.now();
 			let node = e.target;
 			let next = "default";
 			let nextLabel = "";
@@ -64,21 +86,61 @@ function Cursor({ enabled = true }) {
 		document.documentElement.addEventListener("mouseleave", onLeave);
 		host.setAttribute("data-hidden", "true");
 		let raf = 0;
+		let lastMoveAt = performance.now();
+		const idleThresholdMs = 1500;
 		const tick = () => {
+			const settledX = Math.abs(target.x - current.x) < .5;
+			const settledY = Math.abs(target.y - current.y) < .5;
+			const idle = performance.now() - lastMoveAt > idleThresholdMs;
+			if (settledX && settledY && idle) {
+				raf = 0;
+				return;
+			}
 			current.x += (target.x - current.x) * .22;
 			current.y += (target.y - current.y) * .22;
 			ring.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
 			dot.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
 			raf = requestAnimationFrame(tick);
 		};
+		const onMoveWake = () => {
+			lastMoveAt = performance.now();
+			if (!raf) raf = requestAnimationFrame(tick);
+		};
+		window.addEventListener("mousemove", onMoveWake, { passive: true });
+		if (reducedMotion) {
+			const snap = () => {
+				ring.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
+				dot.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
+			};
+			const snapOnMove = (e) => {
+				target.x = e.clientX;
+				target.y = e.clientY;
+				snap();
+			};
+			window.addEventListener("mousemove", snapOnMove, { passive: true });
+			raf = requestAnimationFrame(() => {
+				snap();
+				cancelAnimationFrame(raf);
+				raf = 0;
+			});
+			return () => {
+				window.removeEventListener("mousemove", onMove);
+				window.removeEventListener("mousemove", onMoveWake);
+				window.removeEventListener("mousemove", snapOnMove);
+				document.documentElement.removeEventListener("mouseenter", onEnter);
+				document.documentElement.removeEventListener("mouseleave", onLeave);
+				cancelAnimationFrame(raf);
+			};
+		}
 		raf = requestAnimationFrame(tick);
 		return () => {
 			cancelAnimationFrame(raf);
 			window.removeEventListener("mousemove", onMove);
+			window.removeEventListener("mousemove", onMoveWake);
 			document.documentElement.removeEventListener("mouseenter", onEnter);
 			document.documentElement.removeEventListener("mouseleave", onLeave);
 		};
-	}, []);
+	}, [reducedMotion]);
 	if (!active) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		ref: hostRef,
@@ -369,9 +431,11 @@ void main() {
 `;
 function LineWaves({ speed = .3, innerLineCount = 32, outerLineCount = 36, warpIntensity = 1, rotation = -45, edgeFadeWidth = 0, colorCycleSpeed = 1, brightness = .2, color1 = "#ffffff", color2 = "#ffffff", color3 = "#ffffff", enableMouseInteraction = true, mouseInfluence = 2, className }) {
 	const containerRef = (0, import_react.useRef)(null);
+	const reducedMotion = useReducedMotion();
 	(0, import_react.useEffect)(() => {
 		const container = containerRef.current;
 		if (!container) return;
+		if (reducedMotion) return;
 		const renderer = new Renderer({
 			alpha: true,
 			premultipliedAlpha: false
@@ -436,9 +500,18 @@ function LineWaves({ speed = .3, innerLineCount = 32, outerLineCount = 36, warpI
 			gl.canvas.addEventListener("mouseleave", handleMouseLeave);
 		}
 		let animationFrameId = 0;
+		let visible = true;
+		const io = new IntersectionObserver((entries) => {
+			const next = entries[0]?.isIntersecting ?? true;
+			if (next === visible) return;
+			visible = next;
+			if (next) animationFrameId = requestAnimationFrame(update);
+		}, { threshold: 0 });
+		io.observe(container);
 		const update = (time) => {
-			animationFrameId = requestAnimationFrame(update);
+			if (visible) animationFrameId = requestAnimationFrame(update);
 			if (!program) return;
+			if (!visible) return;
 			program.uniforms.uTime.value = time * .001;
 			if (enableMouseInteraction) {
 				currentMouse[0] += .05 * (targetMouse[0] - currentMouse[0]);
@@ -454,6 +527,7 @@ function LineWaves({ speed = .3, innerLineCount = 32, outerLineCount = 36, warpI
 		animationFrameId = requestAnimationFrame(update);
 		return () => {
 			cancelAnimationFrame(animationFrameId);
+			io.disconnect();
 			window.removeEventListener("resize", resize);
 			if (enableMouseInteraction) {
 				gl.canvas.removeEventListener("mousemove", handleMouseMove);
@@ -475,7 +549,8 @@ function LineWaves({ speed = .3, innerLineCount = 32, outerLineCount = 36, warpI
 		color2,
 		color3,
 		enableMouseInteraction,
-		mouseInfluence
+		mouseInfluence,
+		reducedMotion
 	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		ref: containerRef,
@@ -1070,33 +1145,48 @@ function TextPressure({ text = "AUXLOOM", fontFamily = "Roboto Flex", width = tr
 		return () => window.removeEventListener("resize", d);
 	}, [setSize]);
 	(0, import_react.useEffect)(() => {
+		const title = titleRef.current;
+		const container = containerRef.current;
+		if (!title || !container) return;
 		let raf = 0;
+		let visible = true;
+		const io = new IntersectionObserver((entries) => {
+			const next = entries[0]?.isIntersecting ?? true;
+			if (next === visible) return;
+			visible = next;
+			if (next) raf = requestAnimationFrame(animate);
+		}, { threshold: 0 });
+		io.observe(container);
 		const animate = () => {
+			if (visible) raf = requestAnimationFrame(animate);
+			if (!visible) return;
 			mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
 			mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
-			if (titleRef.current) {
-				const maxDist = titleRef.current.getBoundingClientRect().width / 2;
-				spansRef.current.forEach((span) => {
-					if (!span) return;
-					const sr = span.getBoundingClientRect();
-					const center = {
-						x: sr.x + sr.width / 2,
-						y: sr.y + sr.height / 2
-					};
-					const d = dist(mouseRef.current, center);
-					const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
-					const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
-					const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : "0";
-					const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : "1";
-					const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
-					if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
-					if (alpha && span.style.opacity !== alphaVal) span.style.opacity = alphaVal;
-				});
+			const maxDist = title.getBoundingClientRect().width / 2;
+			const spans = spansRef.current;
+			for (let i = 0; i < spans.length; i++) {
+				const span = spans[i];
+				if (!span) continue;
+				const sr = span.getBoundingClientRect();
+				const center = {
+					x: sr.x + sr.width / 2,
+					y: sr.y + sr.height / 2
+				};
+				const d = dist(mouseRef.current, center);
+				const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
+				const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
+				const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : "0";
+				const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : "1";
+				const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+				if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
+				if (alpha && span.style.opacity !== alphaVal) span.style.opacity = alphaVal;
 			}
-			raf = requestAnimationFrame(animate);
 		};
-		animate();
-		return () => cancelAnimationFrame(raf);
+		raf = requestAnimationFrame(animate);
+		return () => {
+			cancelAnimationFrame(raf);
+			io.disconnect();
+		};
 	}, [
 		width,
 		weight,

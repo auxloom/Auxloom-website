@@ -1,11 +1,11 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-A2aFz4pv.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-DrOw0cer.js
 var tsrStartManifest = () => ({
 	routes: {
 		__root__: {
 			filePath: "E:/Auxloom/lovable-project-0b85d738/src/routes/__root.tsx",
 			children: ["/"],
 			assets: void 0,
-			preloads: ["/assets/index-Cqn6VbuQ.js"]
+			preloads: ["/assets/index-CWuRgrR1.js"]
 		},
 		"/": {
 			filePath: "E:/Auxloom/lovable-project-0b85d738/src/routes/index.tsx",
@@ -18,10 +18,10 @@ var tsrStartManifest = () => ({
 					type: "text/css"
 				}
 			}],
-			preloads: ["/assets/routes-CosVsI9D.js"]
+			preloads: ["/assets/routes-u9B8VXZ1.js"]
 		}
 	},
-	clientEntry: "/assets/index-Cqn6VbuQ.js"
+	clientEntry: "/assets/index-CWuRgrR1.js"
 });
 //#endregion
 export { tsrStartManifest };

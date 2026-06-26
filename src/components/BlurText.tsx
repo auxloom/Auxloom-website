@@ -16,10 +16,7 @@ interface BlurTextProps {
 }
 
 const buildKeyframes = (from: Snapshot, steps: Snapshot[]) => {
-  const keys = new Set<string>([
-    ...Object.keys(from),
-    ...steps.flatMap((s) => Object.keys(s)),
-  ]);
+  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap((s) => Object.keys(s))]);
   const out: Record<string, Array<string | number>> = {};
   keys.forEach((k) => {
     out[k] = [from[k], ...steps.map((s) => s[k])];
@@ -95,9 +92,7 @@ export default function BlurText({
               delay: (index * delay) / 1000,
               ease: "easeOut" as Easing,
             }}
-            onAnimationComplete={
-              index === elements.length - 1 ? onAnimationComplete : undefined
-            }
+            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
             style={{ display: "inline-block", willChange: "transform, filter, opacity" }}
           >
             {segment === " " ? "\u00A0" : segment}
