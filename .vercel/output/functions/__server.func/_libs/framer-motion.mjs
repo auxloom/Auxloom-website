@@ -1,4 +1,4 @@
-import { a as __toCommonJS, n as __esmMin, o as __toESM, r as __exportAll } from "../_runtime.mjs";
+import { i as __exportAll, o as __toCommonJS, r as __esmMin, s as __toESM } from "../__23tanstack-start-server-fn-resolver-CG54XWCZ.mjs";
 import { n as require_jsx_runtime, r as require_react } from "./react+tanstack__react-query.mjs";
 //#region node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs
 var import_jsx_runtime = require_jsx_runtime();
@@ -731,7 +731,7 @@ var mixColor = (from, to) => {
 };
 //#endregion
 //#region node_modules/motion-dom/dist/es/utils/mix/visibility.mjs
-var invisibleValues = new Set(["none", "hidden"]);
+var invisibleValues = /* @__PURE__ */ new Set(["none", "hidden"]);
 /**
 * Returns a function that, when provided a progress value between 0 and 1,
 * will return the "none" or "hidden" string only when the progress is that of
@@ -1752,11 +1752,11 @@ var transformPropOrder = [
 * slot, and must stay out of the order-array consumers (parse-transform,
 * unit-conversion, keys-position).
 */
-var transformProps = /*@__PURE__*/ (() => new Set([...transformPropOrder, "pathRotation"]))();
+var transformProps = /*@__PURE__*/ (() => /* @__PURE__ */ new Set([...transformPropOrder, "pathRotation"]))();
 //#endregion
 //#region node_modules/motion-dom/dist/es/animation/keyframes/utils/unit-conversion.mjs
 var isNumOrPxType = (v) => v === number || v === px;
-var transformKeys = new Set([
+var transformKeys = /* @__PURE__ */ new Set([
 	"x",
 	"y",
 	"z"
@@ -2308,7 +2308,7 @@ function makeAnimationInstant(options) {
 /**
 * A list of values that can be hardware-accelerated.
 */
-var acceleratedValues = new Set([
+var acceleratedValues = /* @__PURE__ */ new Set([
 	"opacity",
 	"clipPath",
 	"filter",
@@ -2323,7 +2323,7 @@ function hasBrowserOnlyColors(keyframes) {
 }
 //#endregion
 //#region node_modules/motion-dom/dist/es/animation/waapi/supports/waapi.mjs
-var colorProperties = new Set([
+var colorProperties = /* @__PURE__ */ new Set([
 	"color",
 	"backgroundColor",
 	"outlineColor",
@@ -2840,7 +2840,7 @@ var getDefaultTransition = (valueKey, { keyframes }) => {
 };
 //#endregion
 //#region node_modules/motion-dom/dist/es/animation/utils/is-transition-defined.mjs
-var orchestrationKeys = new Set([
+var orchestrationKeys = /* @__PURE__ */ new Set([
 	"when",
 	"delay",
 	"delayChildren",
@@ -3014,7 +3014,7 @@ function resolveVariant(visualElement, definition, custom) {
 }
 //#endregion
 //#region node_modules/motion-dom/dist/es/render/utils/keys-position.mjs
-var positionalKeys = new Set([
+var positionalKeys = /* @__PURE__ */ new Set([
 	"width",
 	"height",
 	"top",
@@ -3258,7 +3258,7 @@ function isNone(value) {
 /**
 * Properties that should default to 1 or 100%
 */
-var maxDefaults = new Set([
+var maxDefaults = /* @__PURE__ */ new Set([
 	"brightness",
 	"contrast",
 	"saturate",
@@ -3430,7 +3430,7 @@ function getAnimatableNone(key, value) {
 * the "none" keyframes. In this case "#fff" or "200px 200px" - then these get turned into
 * zero equivalents, i.e. "#fff0" or "0px 0px".
 */
-var invalidTemplates = new Set([
+var invalidTemplates = /* @__PURE__ */ new Set([
 	"auto",
 	"none",
 	"0"
@@ -3708,7 +3708,7 @@ var isPrimaryPointer = (event) => {
 };
 //#endregion
 //#region node_modules/motion-dom/dist/es/gestures/press/utils/is-keyboard-accessible.mjs
-var keyboardAccessibleElements = new Set([
+var keyboardAccessibleElements = /* @__PURE__ */ new Set([
 	"BUTTON",
 	"INPUT",
 	"SELECT",
@@ -3722,7 +3722,7 @@ var keyboardAccessibleElements = new Set([
 function isElementKeyboardAccessible(element) {
 	return keyboardAccessibleElements.has(element.tagName) || element.isContentEditable === true;
 }
-var textInputElements = new Set([
+var textInputElements = /* @__PURE__ */ new Set([
 	"INPUT",
 	"SELECT",
 	"TEXTAREA"
@@ -5064,7 +5064,7 @@ function buildSVGAttrs(state, { attrX, attrY, attrScale, pathLength, pathSpacing
 /**
 * A set of attribute names that are always read/written as camel case.
 */
-var camelCaseAttributes = new Set([
+var camelCaseAttributes = /* @__PURE__ */ new Set([
 	"baseFrequency",
 	"diffuseConstant",
 	"kernelMatrix",
@@ -7697,7 +7697,7 @@ function loadFeatures(features) {
 * @privateRemarks
 * This doesn't throw if a `MotionProp` name is missing - it should.
 */
-var validMotionProps = new Set([
+var validMotionProps = /* @__PURE__ */ new Set([
 	"animate",
 	"exit",
 	"variants",

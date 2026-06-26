@@ -1,77 +1,8 @@
-import { i as __require, o as __toESM, t as __commonJSMin } from "../../_runtime.mjs";
-import { n as require_jsx_runtime, r as require_react } from "../react+tanstack__react-query.mjs";
+import { a as __require, n as __commonJSMin, s as __toESM } from "../../__23tanstack-start-server-fn-resolver-CG54XWCZ.mjs";
 import { r as parseHref } from "../tanstack__history.mjs";
+import { n as require_jsx_runtime, r as require_react } from "../react+tanstack__react-query.mjs";
 import { PassThrough, Readable } from "node:stream";
 import { ReadableStream as ReadableStream$1 } from "node:stream/web";
-//#region node_modules/@tanstack/react-router/dist/esm/utils.js
-var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
-/**
-* React.use if available (React 19+), undefined otherwise.
-* Use dynamic lookup to avoid Webpack compilation errors with React 18.
-*/
-var reactUse = import_react.use;
-typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
-/**
-* React hook to wrap `IntersectionObserver`.
-*
-* This hook will create an `IntersectionObserver` and observe the ref passed to it.
-*
-* When the intersection changes, the callback will be called with the `IntersectionObserverEntry`.
-*
-* @param ref - The ref to observe
-* @param intersectionObserverOptions - The options to pass to the IntersectionObserver
-* @param options - The options to pass to the hook
-* @param callback - The callback to call when the intersection changes
-* @returns The IntersectionObserver instance
-* @example
-* ```tsx
-* const MyComponent = () => {
-* const ref = React.useRef<HTMLDivElement>(null)
-* useIntersectionObserver(
-*  ref,
-*  (entry) => { doSomething(entry) },
-*  { rootMargin: '10px' },
-*  { disabled: false }
-* )
-* return <div ref={ref} />
-* ```
-*/
-function useIntersectionObserver(ref, callback, intersectionObserverOptions = {}, options = {}) {
-	import_react.useEffect(() => {
-		if (!ref.current || options.disabled || typeof IntersectionObserver !== "function") return;
-		const observer = new IntersectionObserver(([entry]) => {
-			callback(entry);
-		}, intersectionObserverOptions);
-		observer.observe(ref.current);
-		return () => {
-			observer.disconnect();
-		};
-	}, [
-		callback,
-		intersectionObserverOptions,
-		options.disabled,
-		ref
-	]);
-}
-/**
-* React hook to take a `React.ForwardedRef` and returns a `ref` that can be used on a DOM element.
-*
-* @param ref - The forwarded ref
-* @returns The inner ref returned by `useRef`
-* @example
-* ```tsx
-* const MyComponent = React.forwardRef((props, ref) => {
-*  const innerRef = useForwardedRef(ref)
-*  return <div ref={innerRef} />
-* })
-* ```
-*/
-function useForwardedRef(ref) {
-	const innerRef = import_react.useRef(null);
-	import_react.useImperativeHandle(ref, () => innerRef.current, []);
-	return innerRef;
-}
-//#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/utils.js
 /**
 * Return the last element of an array.
@@ -90,6 +21,11 @@ function isFunction(d) {
 function functionalUpdate(updater, previous) {
 	if (isFunction(updater)) return updater(previous);
 	return updater;
+}
+var hasOwn = Object.prototype.hasOwnProperty;
+function hasKeys(obj) {
+	for (const key in obj) if (hasOwn.call(obj, key)) return true;
+	return false;
 }
 var createNull = () => Object.create(null);
 var nullReplaceEqualDeep = (prev, next) => replaceEqualDeep(prev, next, createNull);
@@ -413,7 +349,7 @@ function getOpenAndCloseBraces(part) {
 * `output` is stored outside to avoid allocations during repeated calls. It doesn't need to be typed
 * or initialized, it will be done automatically.
 */
-function parseSegment(path, start, output = new Uint16Array(6)) {
+function parseSegment(path, start, output = /* @__PURE__ */ new Uint16Array(6)) {
 	const next = path.indexOf("/", start);
 	const end = next === -1 ? path.length : next;
 	const part = path.substring(start, end);
@@ -508,7 +444,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 		const path = route.fullPath ?? route.from;
 		const length = path.length;
 		const caseSensitive = route.options?.caseSensitive ?? defaultCaseSensitive;
-		const skipOnParamError = !!(route.options?.params?.parse && route.options?.skipRouteOnParseError?.params);
+		const parseParams = route.options?.params?.parse ?? route.options?.parseParams;
 		while (cursor < length) {
 			const segment = parseSegment(path, cursor, data);
 			let nextNode;
@@ -551,7 +487,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 					const actuallyCaseSensitive = caseSensitive && !!(prefix_raw || suffix_raw);
 					const prefix = !prefix_raw ? void 0 : actuallyCaseSensitive ? prefix_raw : prefix_raw.toLowerCase();
 					const suffix = !suffix_raw ? void 0 : actuallyCaseSensitive ? suffix_raw : suffix_raw.toLowerCase();
-					const existingNode = !skipOnParamError && node.dynamic?.find((s) => !s.skipOnParamError && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
+					const existingNode = !parseParams && node.dynamic?.find((s) => !s.parse && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
 					if (existingNode) nextNode = existingNode;
 					else {
 						const next = createDynamicNode(1, route.fullPath ?? route.from, actuallyCaseSensitive, prefix, suffix);
@@ -569,7 +505,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 					const actuallyCaseSensitive = caseSensitive && !!(prefix_raw || suffix_raw);
 					const prefix = !prefix_raw ? void 0 : actuallyCaseSensitive ? prefix_raw : prefix_raw.toLowerCase();
 					const suffix = !suffix_raw ? void 0 : actuallyCaseSensitive ? suffix_raw : suffix_raw.toLowerCase();
-					const existingNode = !skipOnParamError && node.optional?.find((s) => !s.skipOnParamError && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
+					const existingNode = !parseParams && node.optional?.find((s) => !s.parse && s.caseSensitive === actuallyCaseSensitive && s.prefix === prefix && s.suffix === suffix);
 					if (existingNode) nextNode = existingNode;
 					else {
 						const next = createDynamicNode(3, route.fullPath ?? route.from, actuallyCaseSensitive, prefix, suffix);
@@ -597,7 +533,7 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 			}
 			node = nextNode;
 		}
-		if (skipOnParamError && route.children && !route.isRoot && route.id && route.id.charCodeAt(route.id.lastIndexOf("/") + 1) === 95) {
+		if (parseParams && route.children && !route.isRoot && route.id && route.id.charCodeAt(route.id.lastIndexOf("/") + 1) === 95) {
 			const pathlessNode = createStaticNode(route.fullPath ?? route.from);
 			pathlessNode.kind = SEGMENT_TYPE_PATHLESS;
 			pathlessNode.parent = node;
@@ -617,9 +553,8 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 			node.index = indexNode;
 			node = indexNode;
 		}
-		node.parse = route.options?.params?.parse ?? null;
-		node.skipOnParamError = skipOnParamError;
-		node.parsingPriority = route.options?.skipRouteOnParseError?.priority ?? 0;
+		node.parse = parseParams ?? null;
+		node.priority = route.options?.params?.priority ?? 0;
 		if (isLeaf && !node.route) {
 			node.route = route;
 			node.fullPath = route.fullPath ?? route.from;
@@ -628,9 +563,9 @@ function parseSegments(defaultCaseSensitive, data, route, start, node, depth, on
 	if (route.children) for (const child of route.children) parseSegments(defaultCaseSensitive, data, child, cursor, node, depth, onRoute);
 }
 function sortDynamic(a, b) {
-	if (a.skipOnParamError && !b.skipOnParamError) return -1;
-	if (!a.skipOnParamError && b.skipOnParamError) return 1;
-	if (a.skipOnParamError && b.skipOnParamError && (a.parsingPriority || b.parsingPriority)) return b.parsingPriority - a.parsingPriority;
+	if (a.parse && !b.parse) return -1;
+	if (!a.parse && b.parse) return 1;
+	if (a.parse && b.parse && (a.priority || b.priority)) return b.priority - a.priority;
 	if (a.prefix && b.prefix && a.prefix !== b.prefix) {
 		if (a.prefix.startsWith(b.prefix)) return -1;
 		if (b.prefix.startsWith(a.prefix)) return 1;
@@ -679,8 +614,7 @@ function createStaticNode(fullPath) {
 		fullPath,
 		parent: null,
 		parse: null,
-		skipOnParamError: false,
-		parsingPriority: 0
+		priority: 0
 	};
 }
 /**
@@ -702,8 +636,7 @@ function createDynamicNode(kind, fullPath, caseSensitive, prefix, suffix) {
 		fullPath,
 		parent: null,
 		parse: null,
-		skipOnParamError: false,
-		parsingPriority: 0,
+		priority: 0,
 		caseSensitive,
 		prefix,
 		suffix
@@ -711,7 +644,7 @@ function createDynamicNode(kind, fullPath, caseSensitive, prefix, suffix) {
 }
 function processRouteMasks(routeList, processedTree) {
 	const segmentTree = createStaticNode("/");
-	const data = new Uint16Array(6);
+	const data = /* @__PURE__ */ new Uint16Array(6);
 	for (const route of routeList) parseSegments(false, data, route, 1, segmentTree, 0);
 	sortTreeNodes(segmentTree);
 	processedTree.masksTree = segmentTree;
@@ -738,7 +671,7 @@ function findSingleMatch(from, caseSensitive, fuzzy, path, processedTree) {
 	let tree = processedTree.singleCache.get(key);
 	if (!tree) {
 		tree = createStaticNode("/");
-		parseSegments(caseSensitive, new Uint16Array(6), { from }, 1, tree, 0);
+		parseSegments(caseSensitive, /* @__PURE__ */ new Uint16Array(6), { from }, 1, tree, 0);
 		processedTree.singleCache.set(key, tree);
 	}
 	return findMatch(path, tree, fuzzy);
@@ -769,7 +702,7 @@ function trimPathRight$1(path) {
 */
 function processRouteTree(routeTree, caseSensitive = false, initRoute) {
 	const segmentTree = createStaticNode(routeTree.fullPath);
-	const data = new Uint16Array(6);
+	const data = /* @__PURE__ */ new Uint16Array(6);
 	const routesById = {};
 	const routesByPath = {};
 	let index = 0;
@@ -803,8 +736,7 @@ function findMatch(path, segmentTree, fuzzy = false) {
 	const [rawParams] = extractParams(path, parts, leaf);
 	return {
 		route: leaf.node.route,
-		rawParams,
-		parsedParams: leaf.parsedParams
+		rawParams
 	};
 }
 /**
@@ -920,13 +852,12 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 	while (stack.length) {
 		const frame = stack.pop();
 		const { node, index, skipped, depth, statics, dynamics, optionals } = frame;
-		let { extract, rawParams, parsedParams } = frame;
+		let { extract, rawParams } = frame;
 		if (node.kind === 2 && node.route && !isFrameMoreSpecific(bestMatch, frame)) continue;
-		if (node.skipOnParamError) {
-			if (!validateMatchParams(path, parts, frame)) continue;
+		if (node.parse) {
+			if (!validateParseParams(path, parts, frame)) continue;
 			rawParams = frame.rawParams;
 			extract = frame.extract;
-			parsedParams = frame.parsedParams;
 		}
 		if (fuzzy && node.route && node.kind !== SEGMENT_TYPE_INDEX && isFrameMoreSpecific(bestFuzzy, frame)) bestFuzzy = frame;
 		const isBeyondPath = index === partsLength;
@@ -946,12 +877,11 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 				dynamics,
 				optionals,
 				extract,
-				rawParams,
-				parsedParams
+				rawParams
 			};
 			let indexValid = true;
-			if (node.index.skipOnParamError) {
-				if (!validateMatchParams(path, parts, indexFrame)) indexValid = false;
+			if (node.index.parse) {
+				if (!validateParseParams(path, parts, indexFrame)) indexValid = false;
 			}
 			if (indexValid) {
 				if (!dynamics && !optionals && !skipped && isPerfectStaticMatch(statics, partsLength)) return indexFrame;
@@ -979,8 +909,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 				dynamics,
 				optionals,
 				extract,
-				rawParams,
-				parsedParams
+				rawParams
 			});
 		}
 		if (node.optional) {
@@ -997,8 +926,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 					dynamics,
 					optionals,
 					extract,
-					rawParams,
-					parsedParams
+					rawParams
 				});
 			}
 			if (!isBeyondPath) for (let i = node.optional.length - 1; i >= 0; i--) {
@@ -1018,8 +946,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 					dynamics,
 					optionals: optionals + segmentScore(partsLength, index),
 					extract,
-					rawParams,
-					parsedParams
+					rawParams
 				});
 			}
 		}
@@ -1040,8 +967,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 				dynamics: dynamics + segmentScore(partsLength, index),
 				optionals,
 				extract,
-				rawParams,
-				parsedParams
+				rawParams
 			});
 		}
 		if (!isBeyondPath && node.staticInsensitive) {
@@ -1055,8 +981,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 				dynamics,
 				optionals,
 				extract,
-				rawParams,
-				parsedParams
+				rawParams
 			});
 		}
 		if (!isBeyondPath && node.static) {
@@ -1070,8 +995,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 				dynamics,
 				optionals,
 				extract,
-				rawParams,
-				parsedParams
+				rawParams
 			});
 		}
 		if (node.pathless) {
@@ -1087,8 +1011,7 @@ function getNodeMatch(path, parts, segmentTree, fuzzy) {
 					dynamics,
 					optionals,
 					extract,
-					rawParams,
-					parsedParams
+					rawParams
 				});
 			}
 		}
@@ -1110,17 +1033,21 @@ function segmentScore(partsLength, index) {
 function isPerfectStaticMatch(statics, partsLength) {
 	return statics === 2 ** (partsLength - 1) - 1;
 }
-function validateMatchParams(path, parts, frame) {
+function validateParseParams(path, parts, frame) {
+	let rawParams;
+	let state;
 	try {
-		const [rawParams, state] = extractParams(path, parts, frame);
-		frame.rawParams = rawParams;
-		frame.extract = state;
-		const parsed = frame.node.parse(rawParams);
-		frame.parsedParams = Object.assign(Object.create(null), frame.parsedParams, parsed);
-		return true;
+		[rawParams, state] = extractParams(path, parts, frame);
 	} catch {
 		return null;
 	}
+	frame.rawParams = rawParams;
+	frame.extract = state;
+	if (!frame.node.parse) return true;
+	try {
+		if (frame.node.parse(rawParams) === false) return null;
+	} catch {}
+	return true;
 }
 function isFrameMoreSpecific(prev, next) {
 	if (!prev) return true;
@@ -1197,28 +1124,7 @@ function resolvePath({ base, to, trailingSlash = "never", cache }) {
 			if (trailingSlash === "never") baseSegments.pop();
 		} else if (trailingSlash === "always") baseSegments.push("");
 	}
-	let segment;
-	let joined = "";
-	for (let i = 0; i < baseSegments.length; i++) {
-		if (i > 0) joined += "/";
-		const part = baseSegments[i];
-		if (!part) continue;
-		segment = parseSegment(part, 0, segment);
-		const kind = segment[0];
-		if (kind === 0) {
-			joined += part;
-			continue;
-		}
-		const end = segment[5];
-		const prefix = part.substring(0, segment[1]);
-		const suffix = part.substring(segment[4], end);
-		const value = part.substring(segment[2], segment[3]);
-		if (kind === 1) joined += prefix || suffix ? `${prefix}{$${value}}${suffix}` : `$${value}`;
-		else if (kind === 2) joined += prefix || suffix ? `${prefix}{$}${suffix}` : "$";
-		else joined += `${prefix}{-$${value}}${suffix}`;
-	}
-	joined = cleanPath(joined);
-	const result = joined || "/";
+	const result = cleanPath(baseSegments.join("/")) || "/";
 	if (key && cache) cache.set(key, result);
 	return result;
 }
@@ -1368,173 +1274,6 @@ function isNotFound(obj) {
 	return obj?.isNotFound === true;
 }
 //#endregion
-//#region node_modules/@tanstack/router-core/dist/esm/scroll-restoration.js
-function getSafeSessionStorage() {
-	try {
-		return typeof window !== "undefined" && typeof window.sessionStorage === "object" ? window.sessionStorage : void 0;
-	} catch {
-		return;
-	}
-}
-var storageKey = "tsr-scroll-restoration-v1_3";
-function createScrollRestorationCache() {
-	const safeSessionStorage = getSafeSessionStorage();
-	if (!safeSessionStorage) return null;
-	let state = {};
-	try {
-		const parsed = JSON.parse(safeSessionStorage.getItem("tsr-scroll-restoration-v1_3") || "{}");
-		if (isPlainObject(parsed)) state = parsed;
-	} catch {}
-	const persist = () => {
-		try {
-			safeSessionStorage.setItem(storageKey, JSON.stringify(state));
-		} catch {}
-	};
-	return {
-		get state() {
-			return state;
-		},
-		set: (updater) => {
-			state = functionalUpdate(updater, state) || state;
-		},
-		persist
-	};
-}
-createScrollRestorationCache();
-/**
-* The default `getKey` function for `useScrollRestoration`.
-* It returns the `key` from the location state or the `href` of the location.
-*
-* The `location.href` is used as a fallback to support the use case where the location state is not available like the initial render.
-*/
-var defaultGetScrollRestorationKey = (location) => {
-	return location.state.__TSR_key || location.href;
-};
-//#endregion
-//#region node_modules/@tanstack/router-core/dist/esm/qss.js
-/**
-* Program is a reimplementation of the `qss` package:
-* Copyright (c) Luke Edwards luke.edwards05@gmail.com, MIT License
-* https://github.com/lukeed/qss/blob/master/license.md
-*
-* This reimplementation uses modern browser APIs
-* (namely URLSearchParams) and TypeScript while still
-* maintaining the original functionality and interface.
-*
-* Update: this implementation has also been mangled to
-* fit exactly our use-case (single value per key in encoding).
-*/
-/**
-* Encodes an object into a query string.
-* @param obj - The object to encode into a query string.
-* @param stringify - An optional custom stringify function.
-* @returns The encoded query string.
-* @example
-* ```
-* // Example input: encode({ token: 'foo', key: 'value' })
-* // Expected output: "token=foo&key=value"
-* ```
-*/
-function encode(obj, stringify = String) {
-	const result = new URLSearchParams();
-	for (const key in obj) {
-		const val = obj[key];
-		if (val !== void 0) result.set(key, stringify(val));
-	}
-	return result.toString();
-}
-/**
-* Converts a string value to its appropriate type (string, number, boolean).
-* @param mix - The string value to convert.
-* @returns The converted value.
-* @example
-* // Example input: toValue("123")
-* // Expected output: 123
-*/
-function toValue(str) {
-	if (!str) return "";
-	if (str === "false") return false;
-	if (str === "true") return true;
-	return +str * 0 === 0 && +str + "" === str ? +str : str;
-}
-/**
-* Decodes a query string into an object.
-* @param str - The query string to decode.
-* @returns The decoded key-value pairs in an object format.
-* @example
-* // Example input: decode("token=foo&key=value")
-* // Expected output: { "token": "foo", "key": "value" }
-*/
-function decode(str) {
-	const searchParams = new URLSearchParams(str);
-	const result = Object.create(null);
-	for (const [key, value] of searchParams.entries()) {
-		const previousValue = result[key];
-		if (previousValue == null) result[key] = toValue(value);
-		else if (Array.isArray(previousValue)) previousValue.push(toValue(value));
-		else result[key] = [previousValue, toValue(value)];
-	}
-	return result;
-}
-//#endregion
-//#region node_modules/@tanstack/router-core/dist/esm/searchParams.js
-/** Default `parseSearch` that strips leading '?' and JSON-parses values. */
-var defaultParseSearch = parseSearchWith(JSON.parse);
-/** Default `stringifySearch` using JSON.stringify for complex values. */
-var defaultStringifySearch = stringifySearchWith(JSON.stringify, JSON.parse);
-/**
-* Build a `parseSearch` function using a provided JSON-like parser.
-*
-* The returned function strips a leading `?`, decodes values, and attempts to
-* JSON-parse string values using the given `parser`.
-*
-* @param parser Function to parse a string value (e.g. `JSON.parse`).
-* @returns A `parseSearch` function compatible with `Router` options.
-* @link https://tanstack.com/router/latest/docs/framework/react/guide/custom-search-param-serialization
-*/
-function parseSearchWith(parser) {
-	return (searchStr) => {
-		if (searchStr[0] === "?") searchStr = searchStr.substring(1);
-		const query = decode(searchStr);
-		for (const key in query) {
-			const value = query[key];
-			if (typeof value === "string") try {
-				query[key] = parser(value);
-			} catch (_err) {}
-		}
-		return query;
-	};
-}
-/**
-* Build a `stringifySearch` function using a provided serializer.
-*
-* Non-primitive values are serialized with `stringify`. If a `parser` is
-* supplied, string values that are parseable are re-serialized to ensure
-* symmetry with `parseSearch`.
-*
-* @param stringify Function to serialize a value (e.g. `JSON.stringify`).
-* @param parser Optional parser to detect parseable strings.
-* @returns A `stringifySearch` function compatible with `Router` options.
-* @link https://tanstack.com/router/latest/docs/framework/react/guide/custom-search-param-serialization
-*/
-function stringifySearchWith(stringify, parser) {
-	const hasParser = typeof parser === "function";
-	function stringifyValue(val) {
-		if (typeof val === "object" && val !== null) try {
-			return stringify(val);
-		} catch (_err) {}
-		else if (hasParser && typeof val === "string") try {
-			parser(val);
-			return stringify(val);
-		} catch (_err) {}
-		return val;
-	}
-	return (search) => {
-		const searchStr = encode(search, stringifyValue);
-		return searchStr ? `?${searchStr}` : "";
-	};
-}
-//#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/root.js
 /** Stable identifier used for the root route in a route tree. */
 var rootRouteId = "__root__";
@@ -1583,9 +1322,13 @@ function isRedirect(obj) {
 function isResolvedRedirect(obj) {
 	return isRedirect(obj) && !!obj.options.href;
 }
+/** Parse a serialized redirect object back into a redirect Response. */
+/** Parse a serialized redirect object back into a redirect Response. */
+function parseRedirect(obj) {
+	if (obj !== null && typeof obj === "object" && obj.isSerializedRedirect) return redirect(obj);
+}
 //#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/rewrite.js
-/** Compose multiple rewrite pairs into a single in/out rewrite. */
 /** Compose multiple rewrite pairs into a single in/out rewrite. */
 function composeRewrites(rewrites) {
 	return {
@@ -1600,13 +1343,11 @@ function composeRewrites(rewrites) {
 	};
 }
 /** Create a rewrite pair that strips/adds a basepath on input/output. */
-/** Create a rewrite pair that strips/adds a basepath on input/output. */
 function rewriteBasepath(opts) {
 	const trimmedBasepath = trimPath(opts.basepath);
 	const normalizedBasepath = `/${trimmedBasepath}`;
-	const normalizedBasepathWithSlash = `${normalizedBasepath}/`;
 	const checkBasepath = opts.caseSensitive ? normalizedBasepath : normalizedBasepath.toLowerCase();
-	const checkBasepathWithSlash = opts.caseSensitive ? normalizedBasepathWithSlash : normalizedBasepathWithSlash.toLowerCase();
+	const checkBasepathWithSlash = `${checkBasepath}/`;
 	return {
 		input: ({ url }) => {
 			const pathname = opts.caseSensitive ? url.pathname : url.pathname.toLowerCase();
@@ -1625,7 +1366,6 @@ function rewriteBasepath(opts) {
 	};
 }
 /** Execute a location input rewrite if provided. */
-/** Execute a location input rewrite if provided. */
 function executeRewriteInput(rewrite, url) {
 	const res = rewrite?.input?.({ url });
 	if (res) {
@@ -1634,7 +1374,6 @@ function executeRewriteInput(rewrite, url) {
 	}
 	return url;
 }
-/** Execute a location output rewrite if provided. */
 /** Execute a location output rewrite if provided. */
 function executeRewriteOutput(rewrite, url) {
 	const res = rewrite?.output?.({ url });
@@ -1786,6 +1525,150 @@ function reconcileMatchPool(nextMatches, pool, idStore, createMutableStore, batc
 	});
 }
 //#endregion
+//#region node_modules/@tanstack/router-core/dist/esm/scroll-restoration.js
+function getSafeSessionStorage() {
+	try {
+		return sessionStorage;
+	} catch {
+		return;
+	}
+}
+var storageKey = "tsr-scroll-restoration-v1_3";
+getSafeSessionStorage();
+/**
+* The default `getKey` function for `useScrollRestoration`.
+* It returns the `key` from the location state or the `href` of the location.
+*
+* The `location.href` is used as a fallback to support the use case where the location state is not available like the initial render.
+*/
+var defaultGetScrollRestorationKey = (location) => {
+	return location.state.__TSR_key || location.href;
+};
+//#endregion
+//#region node_modules/@tanstack/router-core/dist/esm/qss.js
+/**
+* Program is a reimplementation of the `qss` package:
+* Copyright (c) Luke Edwards luke.edwards05@gmail.com, MIT License
+* https://github.com/lukeed/qss/blob/master/license.md
+*
+* This reimplementation uses modern browser APIs
+* (namely URLSearchParams) and TypeScript while still
+* maintaining the original functionality and interface.
+*
+* Update: this implementation has also been mangled to
+* fit exactly our use-case (single value per key in encoding).
+*/
+/**
+* Encodes an object into a query string.
+* @param obj - The object to encode into a query string.
+* @param stringify - An optional custom stringify function.
+* @returns The encoded query string.
+* @example
+* ```
+* // Example input: encode({ token: 'foo', key: 'value' })
+* // Expected output: "token=foo&key=value"
+* ```
+*/
+function encode(obj, stringify = String) {
+	const result = new URLSearchParams();
+	for (const key in obj) {
+		const val = obj[key];
+		if (val !== void 0) result.set(key, stringify(val));
+	}
+	return result.toString();
+}
+/**
+* Converts a string value to its appropriate type (string, number, boolean).
+* @param mix - The string value to convert.
+* @returns The converted value.
+* @example
+* // Example input: toValue("123")
+* // Expected output: 123
+*/
+function toValue(str) {
+	if (!str) return "";
+	if (str === "false") return false;
+	if (str === "true") return true;
+	return +str * 0 === 0 && +str + "" === str ? +str : str;
+}
+/**
+* Decodes a query string into an object.
+* @param str - The query string to decode.
+* @returns The decoded key-value pairs in an object format.
+* @example
+* // Example input: decode("token=foo&key=value")
+* // Expected output: { "token": "foo", "key": "value" }
+*/
+function decode(str) {
+	const searchParams = new URLSearchParams(str);
+	const result = Object.create(null);
+	for (const [key, value] of searchParams.entries()) {
+		const previousValue = result[key];
+		if (previousValue == null) result[key] = toValue(value);
+		else if (Array.isArray(previousValue)) previousValue.push(toValue(value));
+		else result[key] = [previousValue, toValue(value)];
+	}
+	return result;
+}
+//#endregion
+//#region node_modules/@tanstack/router-core/dist/esm/searchParams.js
+/** Default `parseSearch` that strips leading '?' and JSON-parses values. */
+var defaultParseSearch = parseSearchWith(JSON.parse);
+/** Default `stringifySearch` using JSON.stringify for complex values. */
+var defaultStringifySearch = stringifySearchWith(JSON.stringify, JSON.parse);
+/**
+* Build a `parseSearch` function using a provided JSON-like parser.
+*
+* The returned function strips a leading `?`, decodes values, and attempts to
+* JSON-parse string values using the given `parser`.
+*
+* @param parser Function to parse a string value (e.g. `JSON.parse`).
+* @returns A `parseSearch` function compatible with `Router` options.
+* @link https://tanstack.com/router/latest/docs/framework/react/guide/custom-search-param-serialization
+*/
+function parseSearchWith(parser) {
+	return (searchStr) => {
+		if (searchStr[0] === "?") searchStr = searchStr.substring(1);
+		const query = decode(searchStr);
+		for (const key in query) {
+			const value = query[key];
+			if (typeof value === "string") try {
+				query[key] = parser(value);
+			} catch (_err) {}
+		}
+		return query;
+	};
+}
+/**
+* Build a `stringifySearch` function using a provided serializer.
+*
+* Non-primitive values are serialized with `stringify`. If a `parser` is
+* supplied, string values that are parseable are re-serialized to ensure
+* symmetry with `parseSearch`.
+*
+* @param stringify Function to serialize a value (e.g. `JSON.stringify`).
+* @param parser Optional parser to detect parseable strings.
+* @returns A `stringifySearch` function compatible with `Router` options.
+* @link https://tanstack.com/router/latest/docs/framework/react/guide/custom-search-param-serialization
+*/
+function stringifySearchWith(stringify, parser) {
+	const hasParser = typeof parser === "function";
+	function stringifyValue(val) {
+		if (typeof val === "object" && val !== null) try {
+			return stringify(val);
+		} catch (_err) {}
+		else if (hasParser && typeof val === "string") try {
+			parser(val);
+			return stringify(val);
+		} catch (_err) {}
+		return val;
+	}
+	return (search) => {
+		const searchStr = encode(search, stringifyValue);
+		return searchStr ? `?${searchStr}` : "";
+	};
+}
+//#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/load-matches.js
 var triggerOnReady = (inner) => {
 	if (!inner.rendered) {
@@ -1867,11 +1750,10 @@ var syncMatchContext = (inner, matchId, index) => {
 		};
 	});
 };
-var handleSerialError = (inner, index, err, routerCode) => {
+var handleSerialError = (inner, index, err) => {
 	const { id: matchId, routeId } = inner.matches[index];
 	const route = inner.router.looseRoutesById[routeId];
 	if (err instanceof Promise) throw err;
-	err.routerCode = routerCode;
 	inner.firstBadMatchIndex ??= index;
 	handleRedirectAndNotFound(inner, inner.router.getMatch(matchId), err);
 	try {
@@ -1966,8 +1848,8 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
 		prevLoadPromise = void 0;
 	});
 	const { paramsError, searchError } = match;
-	if (paramsError) handleSerialError(inner, index, paramsError, "PARSE_PARAMS");
-	if (searchError) handleSerialError(inner, index, searchError, "VALIDATE_SEARCH");
+	if (paramsError) handleSerialError(inner, index, paramsError);
+	if (searchError) handleSerialError(inner, index, searchError);
 	setupPendingTimeout(inner, matchId, route, match);
 	const abortController = new AbortController();
 	let isPending = false;
@@ -2030,7 +1912,7 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
 		}
 		if (isRedirect(beforeLoadContext) || isNotFound(beforeLoadContext)) {
 			pending();
-			handleSerialError(inner, index, beforeLoadContext, "BEFORE_LOAD");
+			handleSerialError(inner, index, beforeLoadContext);
 		}
 		inner.router.batch(() => {
 			pending();
@@ -2047,12 +1929,12 @@ var executeBeforeLoad = (inner, matchId, index, route) => {
 		if (isPromise(beforeLoadContext)) {
 			pending();
 			return beforeLoadContext.catch((err) => {
-				handleSerialError(inner, index, err, "BEFORE_LOAD");
+				handleSerialError(inner, index, err);
 			}).then(updateContext);
 		}
 	} catch (err) {
 		pending();
-		handleSerialError(inner, index, err, "BEFORE_LOAD");
+		handleSerialError(inner, index, err);
 	}
 	updateContext(beforeLoadContext);
 };
@@ -2435,6 +2317,7 @@ function getLocationChangeInfo(location, resolvedLocation) {
 		hashChanged: fromLocation?.hash !== toLocation.hash
 	};
 }
+var locationHistoryActions = /* @__PURE__ */ new WeakMap();
 /**
 * Core, framework-agnostic router engine that powers TanStack Router.
 *
@@ -2450,12 +2333,11 @@ var RouterCore = class {
 	*/
 	constructor(options, getStoreConfig) {
 		this.tempLocationKey = `${Math.round(Math.random() * 1e7)}`;
-		this.resetNextScroll = true;
+		this._scroll = { next: true };
 		this.shouldViewTransition = void 0;
 		this.isViewTransitionTypesSupported = void 0;
 		this.subscribers = /* @__PURE__ */ new Set();
-		this.isScrollRestoring = false;
-		this.isScrollRestorationSetup = false;
+		this.routeBranchCache = /* @__PURE__ */ new WeakMap();
 		this.startTransition = (fn) => fn();
 		this.update = (newOptions) => {
 			const prevOptions = this.options;
@@ -2510,7 +2392,7 @@ var RouterCore = class {
 				needsLocationUpdate = true;
 			}
 			if (needsLocationUpdate && this.stores) this.stores.location.set(this.latestLocation);
-			if (typeof window !== "undefined" && "CSS" in window && typeof window.CSS?.supports === "function") this.isViewTransitionTypesSupported = window.CSS.supports("selector(:active-view-transition-type(a)");
+			if (typeof window !== "undefined" && "CSS" in window && typeof window.CSS?.supports === "function") this.isViewTransitionTypesSupported = window.CSS.supports("selector(:active-view-transition-type(a))");
 		};
 		this.updateLatestLocation = () => {
 			this.latestLocation = this.parseLocation(this.history.location, this.latestLocation);
@@ -2586,7 +2468,7 @@ var RouterCore = class {
 		this.resolvePathWithBase = (from, path) => {
 			return resolvePath({
 				base: from,
-				to: cleanPath(path),
+				to: path.includes("//") ? cleanPath(path) : path,
 				trailingSlash: this.options.trailingSlash,
 				cache: this.resolvePathCache
 			});
@@ -2629,15 +2511,22 @@ var RouterCore = class {
 				const lightweightResult = this.matchRoutesLightweight(currentLocation);
 				if (dest.from && false);
 				const defaultedFromPath = dest.unsafeRelative === "path" ? currentLocation.pathname : dest.from ?? lightweightResult.fullPath;
-				const fromPath = this.resolvePathWithBase(defaultedFromPath, ".");
+				const destTo = dest.to ? `${dest.to}` : void 0;
 				const fromSearch = lightweightResult.search;
 				const fromParams = Object.assign(Object.create(null), lightweightResult.params);
-				const nextTo = dest.to ? this.resolvePathWithBase(fromPath, `${dest.to}`) : this.resolvePathWithBase(fromPath, ".");
+				const sourcePath = destTo?.charCodeAt(0) === 47 ? "/" : this.resolvePathWithBase(defaultedFromPath, ".");
+				const nextTo = destTo ? this.resolvePathWithBase(sourcePath, destTo) : sourcePath;
 				const nextParams = dest.params === false || dest.params === null ? Object.create(null) : (dest.params ?? true) === true ? fromParams : Object.assign(fromParams, functionalUpdate(dest.params, fromParams));
-				const destMatchResult = this.getMatchedRoutes(nextTo);
-				let destRoutes = destMatchResult.matchedRoutes;
-				if ((!destMatchResult.foundRoute || destMatchResult.foundRoute.path !== "/" && destMatchResult.routeParams["**"]) && this.options.notFoundRoute) destRoutes = [...destRoutes, this.options.notFoundRoute];
-				if (Object.keys(nextParams).length > 0) for (const route of destRoutes) {
+				const destRoute = this.routesByPath[trimPathRight(nextTo)];
+				let destRoutes;
+				if (destRoute) destRoutes = this.getRouteBranch(destRoute);
+				else if (nextTo.includes("$")) destRoutes = [];
+				else {
+					const destMatchResult = this.getMatchedRoutes(nextTo);
+					destRoutes = destMatchResult.matchedRoutes;
+					if (this.options.notFoundRoute && (!destMatchResult.foundRoute || destMatchResult.foundRoute.path !== "/" && destMatchResult.routeParams["**"])) destRoutes = [...destRoutes, this.options.notFoundRoute];
+				}
+				if (destRoutes.length && hasKeys(nextParams)) for (const route of destRoutes) {
 					const fn = route.options.params?.stringify ?? route.options.stringifyParams;
 					if (fn) try {
 						Object.assign(nextParams, fn(nextParams));
@@ -2732,6 +2621,7 @@ var RouterCore = class {
 			return buildWithMatches(opts);
 		};
 		this.commitLocation = async ({ viewTransition, ignoreBlocker, ...next }) => {
+			let historyAction;
 			const isSameState = () => {
 				const ignoredProps = [
 					"key",
@@ -2780,10 +2670,11 @@ var RouterCore = class {
 				}
 				nextHistory.state.__hashScrollIntoViewOptions = hashScrollIntoView ?? this.options.defaultHashScrollIntoView ?? true;
 				this.shouldViewTransition = viewTransition;
-				this.history[next.replace ? "replace" : "push"](nextHistory.publicHref, nextHistory.state, { ignoreBlocker });
+				historyAction = next.replace ? "REPLACE" : "PUSH";
+				this.history[historyAction === "REPLACE" ? "replace" : "push"](nextHistory.publicHref, nextHistory.state, { ignoreBlocker });
 			}
-			this.resetNextScroll = next.resetScroll ?? true;
-			if (!this.history.subscribers.size) this.load();
+			this._scroll.next = next.resetScroll ?? true;
+			if (!this.history.subscribers.size) this.load(historyAction ? { action: { type: historyAction } } : void 0);
 			return this.commitLocationPromise;
 		};
 		this.buildAndCommitLocation = ({ replace, resetScroll, hashScrollIntoView, viewTransition, ignoreBlocker, href, ...rest } = {}) => {
@@ -2885,6 +2776,7 @@ var RouterCore = class {
 			});
 		};
 		this.load = async (opts) => {
+			const historyAction = opts?.action?.type;
 			let redirect;
 			let notFound;
 			let loadPromise;
@@ -2893,6 +2785,8 @@ var RouterCore = class {
 				this.startTransition(async () => {
 					try {
 						this.beforeLoad();
+						if (historyAction) locationHistoryActions.set(this.latestLocation, historyAction);
+						else locationHistoryActions.delete(this.latestLocation);
 						const next = this.latestLocation;
 						const locationChangeInfo = getLocationChangeInfo(next, this.stores.resolvedLocation.get());
 						if (!this.stores.redirect.get()) this.emit({
@@ -3092,8 +2986,8 @@ var RouterCore = class {
 				preload: true,
 				dest: opts
 			});
-			const activeMatchIds = new Set([...this.stores.matchesId.get(), ...this.stores.pendingIds.get()]);
-			const loadedMatchIds = new Set([...activeMatchIds, ...this.stores.cachedIds.get()]);
+			const activeMatchIds = /* @__PURE__ */ new Set([...this.stores.matchesId.get(), ...this.stores.pendingIds.get()]);
+			const loadedMatchIds = /* @__PURE__ */ new Set([...activeMatchIds, ...this.stores.cachedIds.get()]);
 			const matchesToCache = matches.filter((match) => !loadedMatchIds.has(match.id));
 			if (matchesToCache.length) {
 				const cachedMatches = this.stores.cachedMatches.get();
@@ -3178,6 +3072,14 @@ var RouterCore = class {
 			this.routesById[notFoundRoute.id] = notFoundRoute;
 		}
 	}
+	getRouteBranch(route) {
+		let branch = this.routeBranchCache.get(route);
+		if (!branch) {
+			branch = buildRouteBranch(route);
+			this.routeBranchCache.set(route, branch);
+		}
+		return branch;
+	}
 	get looseRoutesById() {
 		return this.routesById;
 	}
@@ -3186,7 +3088,7 @@ var RouterCore = class {
 	}
 	matchRoutesInternal(next, opts) {
 		const matchedRoutesResult = this.getMatchedRoutes(next.pathname);
-		const { foundRoute, routeParams, parsedParams } = matchedRoutesResult;
+		const { foundRoute, routeParams } = matchedRoutesResult;
 		let { matchedRoutes } = matchedRoutesResult;
 		let isGlobalNotFound = false;
 		if (foundRoute ? foundRoute.path !== "/" && routeParams["**"] : trimPathRight(next.pathname)) if (this.options.notFoundRoute) matchedRoutes = [...matchedRoutes, this.options.notFoundRoute];
@@ -3238,7 +3140,7 @@ var RouterCore = class {
 			const strictParams = existingMatch?._strictParams ?? usedParams;
 			let paramsError = void 0;
 			if (!existingMatch) try {
-				extractStrictParams(route, usedParams, parsedParams, strictParams);
+				extractStrictParams(route, strictParams);
 			} catch (err) {
 				if (isNotFound(err) || isRedirect(err)) paramsError = err;
 				else paramsError = new PathParamError(err.message, { cause: err });
@@ -3344,7 +3246,7 @@ var RouterCore = class {
 	* operations like AbortController, ControlledPromise, loaderDeps, and full match objects.
 	*/
 	matchRoutesLightweight(location) {
-		const { matchedRoutes, routeParams, parsedParams } = this.getMatchedRoutes(location.pathname);
+		const { matchedRoutes, routeParams } = this.getMatchedRoutes(location.pathname);
 		const lastRoute = last(matchedRoutes);
 		const accumulatedSearch = { ...location.search };
 		for (const route of matchedRoutes) try {
@@ -3358,7 +3260,7 @@ var RouterCore = class {
 		else {
 			const strictParams = Object.assign(Object.create(null), routeParams);
 			for (const route of matchedRoutes) try {
-				extractStrictParams(route, routeParams, parsedParams ?? {}, strictParams);
+				extractStrictParams(route, strictParams);
 			} catch {}
 			params = strictParams;
 		}
@@ -3407,18 +3309,15 @@ function getMatchedRoutes({ pathname, routesById, processedTree }) {
 	const routeParams = Object.create(null);
 	const trimmedPath = trimPathRight(pathname);
 	let foundRoute = void 0;
-	let parsedParams = void 0;
 	const match = findRouteMatch(trimmedPath, processedTree, true);
 	if (match) {
 		foundRoute = match.route;
 		Object.assign(routeParams, match.rawParams);
-		parsedParams = Object.assign(Object.create(null), match.parsedParams);
 	}
 	return {
 		matchedRoutes: match?.branch || [routesById["__root__"]],
 		routeParams,
-		foundRoute,
-		parsedParams
+		foundRoute
 	};
 }
 /**
@@ -3429,62 +3328,67 @@ function applySearchMiddleware({ search, dest, destRoutes, _includeValidateSearc
 	return buildMiddlewareChain(destRoutes)(search, dest, _includeValidateSearch ?? false);
 }
 function buildMiddlewareChain(destRoutes) {
-	const context = {
-		dest: null,
-		_includeValidateSearch: false,
-		middlewares: []
-	};
+	let dest;
+	let includeValidateSearch;
+	const middlewares = [];
 	for (const route of destRoutes) {
-		if ("search" in route.options) {
-			if (route.options.search?.middlewares) context.middlewares.push(...route.options.search.middlewares);
-		} else if (route.options.preSearchFilters || route.options.postSearchFilters) {
+		const routeOptions = route.options;
+		if ("search" in routeOptions) {
+			if (routeOptions.search?.middlewares) middlewares.push(...routeOptions.search.middlewares);
+		} else if (routeOptions.preSearchFilters || routeOptions.postSearchFilters) {
 			const legacyMiddleware = ({ search, next }) => {
-				let nextSearch = search;
-				if ("preSearchFilters" in route.options && route.options.preSearchFilters) nextSearch = route.options.preSearchFilters.reduce((prev, next) => next(prev), search);
-				const result = next(nextSearch);
-				if ("postSearchFilters" in route.options && route.options.postSearchFilters) return route.options.postSearchFilters.reduce((prev, next) => next(prev), result);
-				return result;
+				const result = next(routeOptions.preSearchFilters ? routeOptions.preSearchFilters.reduce((prev, next) => next(prev), search) : search);
+				return routeOptions.postSearchFilters ? routeOptions.postSearchFilters.reduce((prev, next) => next(prev), result) : result;
 			};
-			context.middlewares.push(legacyMiddleware);
+			middlewares.push(legacyMiddleware);
 		}
-		if (route.options.validateSearch) {
-			const validate = ({ search, next }) => {
+		const routeValidateSearch = routeOptions.validateSearch;
+		if (routeValidateSearch) {
+			const validate = ({ search, next, meta }) => {
 				const result = next(search);
-				if (!context._includeValidateSearch) return result;
-				try {
+				if (includeValidateSearch) try {
+					const validated = validateSearch(routeValidateSearch, result);
+					if (meta && validated) {
+						for (const key in validated) if (!(key in result)) (meta.defaulted ||= /* @__PURE__ */ new Map()).set(key, validated[key]);
+					}
 					return {
 						...result,
-						...validateSearch(route.options.validateSearch, result) ?? void 0
+						...validated
 					};
-				} catch {
-					return result;
-				}
+				} catch {}
+				return result;
 			};
-			context.middlewares.push(validate);
+			middlewares.push(validate);
 		}
 	}
-	const final = ({ search }) => {
-		const dest = context.dest;
-		if (!dest.search) return {};
-		if (dest.search === true) return search;
-		return functionalUpdate(dest.search, search);
-	};
-	context.middlewares.push(final);
-	const applyNext = (index, currentSearch, middlewares) => {
-		if (index >= middlewares.length) return currentSearch;
-		const middleware = middlewares[index];
-		const next = (newSearch) => {
-			return applyNext(index + 1, newSearch, middlewares);
+	const applyNext = (index, currentSearch, meta) => {
+		if (index >= middlewares.length) {
+			if (!dest.search) return {};
+			if (dest.search === true) return currentSearch;
+			const result = functionalUpdate(dest.search, currentSearch);
+			if (meta) meta.explicit = result;
+			return result;
+		}
+		const next = (newSearch, collectMeta) => {
+			if (collectMeta) {
+				const nextMeta = meta || {};
+				return {
+					search: applyNext(index + 1, newSearch, nextMeta),
+					meta: nextMeta
+				};
+			}
+			return applyNext(index + 1, newSearch, meta);
 		};
-		return middleware({
+		return middlewares[index]({
 			search: currentSearch,
-			next
+			next,
+			meta
 		});
 	};
-	return function middleware(search, dest, _includeValidateSearch) {
-		context.dest = dest;
-		context._includeValidateSearch = _includeValidateSearch;
-		return applyNext(0, search, context.middlewares);
+	return function middleware(search, nextDest, _includeValidateSearch) {
+		dest = nextDest;
+		includeValidateSearch = _includeValidateSearch;
+		return applyNext(0, search);
 	};
 }
 function findGlobalNotFoundRouteId(notFoundMode, routes) {
@@ -3494,12 +3398,11 @@ function findGlobalNotFoundRouteId(notFoundMode, routes) {
 	}
 	return rootRouteId;
 }
-function extractStrictParams(route, referenceParams, parsedParams, accumulatedParams) {
+function extractStrictParams(route, accumulatedParams) {
 	const parseParams = route.options.params?.parse ?? route.options.parseParams;
-	if (parseParams) if (route.options.skipRouteOnParseError) {
-		for (const key in referenceParams) if (key in parsedParams) accumulatedParams[key] = parsedParams[key];
-	} else {
+	if (parseParams) {
 		const result = parseParams(accumulatedParams);
+		if (result === false) throw new Error("Route params.parse returned false for a matched route");
 		Object.assign(accumulatedParams, result);
 	}
 }
@@ -3513,6 +3416,21 @@ function getAssetCrossOrigin(assetCrossOrigin, kind) {
 	if (typeof assetCrossOrigin === "string") return assetCrossOrigin;
 	return assetCrossOrigin[kind];
 }
+function getManifestScriptFormat(manifest) {
+	return manifest?.scriptFormat ?? "module";
+}
+function getScriptPreloadAttrs(manifest, link, assetCrossOrigin) {
+	const preloadLink = resolveManifestAssetLink(link);
+	const crossOrigin = getAssetCrossOrigin(assetCrossOrigin, "script") ?? preloadLink.crossOrigin;
+	return {
+		...getManifestScriptFormat(manifest) === "iife" ? {
+			rel: "preload",
+			as: "script"
+		} : { rel: "modulepreload" },
+		href: preloadLink.href,
+		...crossOrigin ? { crossOrigin } : {}
+	};
+}
 function resolveManifestAssetLink(link) {
 	if (typeof link === "string") return {
 		href: link,
@@ -3520,32 +3438,38 @@ function resolveManifestAssetLink(link) {
 	};
 	return link;
 }
-function getStylesheetHref(asset) {
-	if (asset.tag !== "link") return void 0;
-	const rel = asset.attrs?.rel;
-	const href = asset.attrs?.href;
-	if (typeof href !== "string") return void 0;
-	if (!(typeof rel === "string" ? rel.split(/\s+/) : []).includes("stylesheet")) return void 0;
-	return href;
+function appendUniqueUserTags(target, tags) {
+	if (tags.length === 0) return;
+	if (tags.length === 1) {
+		target.push(tags[0]);
+		return;
+	}
+	const seen = /* @__PURE__ */ new Set();
+	for (const tag of tags) {
+		const key = JSON.stringify(tag);
+		if (seen.has(key)) continue;
+		seen.add(key);
+		target.push(tag);
+	}
 }
-function isInlinableStylesheet(manifest, asset) {
-	const href = getStylesheetHref(asset);
-	return !!href && manifest?.inlineCss?.styles[href] !== void 0;
+function getStylesheetHref(asset) {
+	return resolveManifestCssLink(asset).href;
+}
+function resolveManifestCssLink(link) {
+	if (typeof link === "string") return {
+		href: link,
+		crossOrigin: void 0
+	};
+	return link;
 }
 function createInlineCssStyleAsset(css) {
 	return {
-		tag: "style",
 		attrs: { suppressHydrationWarning: true },
-		inlineCss: true,
 		children: css
 	};
 }
 function createInlineCssPlaceholderAsset() {
-	return {
-		tag: "style",
-		attrs: { suppressHydrationWarning: true },
-		inlineCss: true
-	};
+	return { attrs: { suppressHydrationWarning: true } };
 }
 //#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/route.js
@@ -3624,100 +3548,95 @@ var BaseRootRoute = class extends BaseRoute {
 var GLOBAL_TSR = "$_TSR";
 var TSR_SCRIPT_BARRIER_ID = "$tsr-stream-barrier";
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/CatchBoundary.js
-var import_jsx_runtime = require_jsx_runtime();
-function CatchBoundary(props) {
-	const errorComponent = props.errorComponent ?? ErrorComponent;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CatchBoundaryImpl, {
-		getResetKey: props.getResetKey,
-		onCatch: props.onCatch,
-		children: ({ error, reset }) => {
-			if (error) return import_react.createElement(errorComponent, {
-				error,
-				reset
-			});
-			return props.children;
-		}
-	});
+//#region node_modules/@tanstack/react-router/dist/esm/routerContext.js
+var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+var routerContext = import_react.createContext(null);
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useRouter.js
+/**
+* Access the current TanStack Router instance from React context.
+* Must be used within a `RouterProvider`.
+*
+* Options:
+* - `warn`: Log a warning if no router context is found (default: true).
+*
+* @returns The registered router instance.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useRouterHook
+*/
+function useRouter(opts) {
+	return import_react.useContext(routerContext);
 }
-var CatchBoundaryImpl = class extends import_react.Component {
-	constructor(..._args) {
-		super(..._args);
-		this.state = { error: null };
-	}
-	static getDerivedStateFromProps(props, state) {
-		const resetKey = props.getResetKey();
-		if (state.error && state.resetKey !== resetKey) return {
-			resetKey,
-			error: null
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/utils.js
+/**
+* React.use if available (React 19+), undefined otherwise.
+* Use dynamic lookup to avoid Webpack compilation errors with React 18.
+*/
+var reactUse = import_react.use;
+typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
+/**
+* React hook to wrap `IntersectionObserver`.
+*
+* This hook will create an `IntersectionObserver` and observe the ref passed to it.
+*
+* When the intersection changes, the callback will be called with the `IntersectionObserverEntry`.
+*
+* @param ref - The ref to observe
+* @param intersectionObserverOptions - The options to pass to the IntersectionObserver
+* @param options - The options to pass to the hook
+* @param callback - The callback to call when the intersection changes
+* @returns The IntersectionObserver instance
+* @example
+* ```tsx
+* const MyComponent = () => {
+* const ref = React.useRef<HTMLDivElement>(null)
+* useIntersectionObserver(
+*  ref,
+*  (entry) => { doSomething(entry) },
+*  { rootMargin: '10px' },
+*  { disabled: false }
+* )
+* return <div ref={ref} />
+* ```
+*/
+function useIntersectionObserver(ref, callback, intersectionObserverOptions = {}, options = {}) {
+	import_react.useEffect(() => {
+		if (!ref.current || options.disabled || typeof IntersectionObserver !== "function") return;
+		const observer = new IntersectionObserver(([entry]) => {
+			callback(entry);
+		}, intersectionObserverOptions);
+		observer.observe(ref.current);
+		return () => {
+			observer.disconnect();
 		};
-		return { resetKey };
-	}
-	static getDerivedStateFromError(error) {
-		return { error };
-	}
-	reset() {
-		this.setState({ error: null });
-	}
-	componentDidCatch(error, errorInfo) {
-		if (this.props.onCatch) this.props.onCatch(error, errorInfo);
-	}
-	render() {
-		return this.props.children({
-			error: this.state.error,
-			reset: () => {
-				this.reset();
-			}
-		});
-	}
-};
-function ErrorComponent({ error }) {
-	const [show, setShow] = import_react.useState(false);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		style: {
-			padding: ".5rem",
-			maxWidth: "100%"
-		},
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				style: {
-					display: "flex",
-					alignItems: "center",
-					gap: ".5rem"
-				},
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-					style: { fontSize: "1rem" },
-					children: "Something went wrong!"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					style: {
-						appearance: "none",
-						fontSize: ".6em",
-						border: "1px solid currentColor",
-						padding: ".1rem .2rem",
-						fontWeight: "bold",
-						borderRadius: ".25rem"
-					},
-					onClick: () => setShow((d) => !d),
-					children: show ? "Hide Error" : "Show Error"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: ".25rem" } }),
-			show ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
-				style: {
-					fontSize: ".7em",
-					border: "1px solid red",
-					borderRadius: ".25rem",
-					padding: ".3rem",
-					color: "red",
-					overflow: "auto"
-				},
-				children: error.message ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: error.message }) : null
-			}) }) : null
-		]
-	});
+	}, [
+		callback,
+		intersectionObserverOptions,
+		options.disabled,
+		ref
+	]);
+}
+/**
+* React hook to take a `React.ForwardedRef` and returns a `ref` that can be used on a DOM element.
+*
+* @param ref - The forwarded ref
+* @returns The inner ref returned by `useRef`
+* @example
+* ```tsx
+* const MyComponent = React.forwardRef((props, ref) => {
+*  const innerRef = useForwardedRef(ref)
+*  return <div ref={innerRef} />
+* })
+* ```
+*/
+function useForwardedRef(ref) {
+	const innerRef = import_react.useRef(null);
+	import_react.useImperativeHandle(ref, () => innerRef.current, []);
+	return innerRef;
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/ClientOnly.js
+var import_jsx_runtime = require_jsx_runtime();
 /**
 * Render the children only after the JS has loaded client-side. Use an optional
 * fallback component if the JS is not yet loaded.
@@ -3763,28 +3682,6 @@ function useHydrated() {
 function subscribe() {
 	return () => {};
 }
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/routerContext.js
-var routerContext = import_react.createContext(null);
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useRouter.js
-/**
-* Access the current TanStack Router instance from React context.
-* Must be used within a `RouterProvider`.
-*
-* Options:
-* - `warn`: Log a warning if no router context is found (default: true).
-*
-* @returns The registered router instance.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useRouterHook
-*/
-function useRouter(opts) {
-	return import_react.useContext(routerContext);
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/matchContext.js
-var matchContext = import_react.createContext(void 0);
-var dummyMatchContext = import_react.createContext(void 0);
 //#endregion
 //#region node_modules/@tanstack/store/dist/esm/alien.js
 var ReactiveFlags = /* @__PURE__ */ ((ReactiveFlags2) => {
@@ -4134,169 +4031,6 @@ function useStore(atom, selector, compare = defaultCompare) {
 	return (0, import_with_selector.useSyncExternalStoreWithSelector)(subscribe, boundGetSnapshot, boundGetSnapshot, selector, compare);
 }
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useMatch.js
-var dummyStore = {
-	get: () => void 0,
-	subscribe: () => ({ unsubscribe: () => {} })
-};
-/**
-* Read and select the nearest or targeted route match.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchHook
-*/
-function useMatch(opts) {
-	const router = useRouter();
-	const nearestMatchId = import_react.useContext(opts.from ? dummyMatchContext : matchContext);
-	const key = opts.from ?? nearestMatchId;
-	const matchStore = key ? opts.from ? router.stores.getRouteMatchStore(key) : router.stores.matchStores.get(key) : void 0;
-	{
-		const match = matchStore?.get();
-		if ((opts.shouldThrow ?? true) && !match) invariant();
-		if (match === void 0) return;
-		return opts.select ? opts.select(match) : match;
-	}
-	const previousResult = import_react.useRef(void 0);
-	return useStore(matchStore ?? dummyStore, (match) => {
-		if ((opts.shouldThrow ?? true) && !match) invariant();
-		if (match === void 0) return;
-		const selected = opts.select ? opts.select(match) : match;
-		if (opts.structuralSharing ?? router.options.defaultStructuralSharing) {
-			const shared = replaceEqualDeep(previousResult.current, selected);
-			previousResult.current = shared;
-			return shared;
-		}
-		return selected;
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useLoaderData.js
-/**
-* Read and select the current route's loader data with type‑safety.
-*
-* Options:
-* - `from`/`strict`: Choose which route's data to read and strictness
-* - `select`: Map the loader data to a derived value
-* - `structuralSharing`: Enable structural sharing for stable references
-*
-* @returns The loader data (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDataHook
-*/
-function useLoaderData(opts) {
-	return useMatch({
-		from: opts.from,
-		strict: opts.strict,
-		structuralSharing: opts.structuralSharing,
-		select: (s) => {
-			return opts.select ? opts.select(s.loaderData) : s.loaderData;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useLoaderDeps.js
-/**
-* Read and select the current route's loader dependencies object.
-*
-* Options:
-* - `from`: Choose which route's loader deps to read
-* - `select`: Map the deps to a derived value
-* - `structuralSharing`: Enable structural sharing for stable references
-*
-* @returns The loader deps (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDepsHook
-*/
-function useLoaderDeps(opts) {
-	const { select, ...rest } = opts;
-	return useMatch({
-		...rest,
-		select: (s) => {
-			return select ? select(s.loaderDeps) : s.loaderDeps;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useParams.js
-/**
-* Access the current route's path parameters with type-safety.
-*
-* Options:
-* - `from`/`strict`: Specify the matched route and whether to enforce strict typing
-* - `select`: Project the params object to a derived value for memoized renders
-* - `structuralSharing`: Enable structural sharing for stable references
-* - `shouldThrow`: Throw if the route is not found in strict contexts
-*
-* @returns The params object (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useParamsHook
-*/
-function useParams(opts) {
-	return useMatch({
-		from: opts.from,
-		shouldThrow: opts.shouldThrow,
-		structuralSharing: opts.structuralSharing,
-		strict: opts.strict,
-		select: (match) => {
-			const params = opts.strict === false ? match.params : match._strictParams;
-			return opts.select ? opts.select(params) : params;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useSearch.js
-/**
-* Read and select the current route's search parameters with type-safety.
-*
-* Options:
-* - `from`/`strict`: Control which route's search is read and how strictly it's typed
-* - `select`: Map the search object to a derived value for render optimization
-* - `structuralSharing`: Enable structural sharing for stable references
-* - `shouldThrow`: Throw when the route is not found (strict contexts)
-*
-* @returns The search object (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useSearchHook
-*/
-function useSearch(opts) {
-	return useMatch({
-		from: opts.from,
-		strict: opts.strict,
-		shouldThrow: opts.shouldThrow,
-		structuralSharing: opts.structuralSharing,
-		select: (match) => {
-			return opts.select ? opts.select(match.search) : match.search;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useNavigate.js
-/**
-* Imperative navigation hook.
-*
-* Returns a stable `navigate(options)` function to change the current location
-* programmatically. Prefer the `Link` component for user-initiated navigation,
-* and use this hook from effects, callbacks, or handlers where imperative
-* navigation is required.
-*
-* Options:
-* - `from`: Optional route base used to resolve relative `to` paths.
-*
-* @returns A function that accepts `NavigateOptions`.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useNavigateHook
-*/
-function useNavigate(_defaultOpts) {
-	const router = useRouter();
-	return import_react.useCallback((options) => {
-		return router.navigate({
-			...options,
-			from: options.from ?? _defaultOpts?.from
-		});
-	}, [_defaultOpts?.from, router]);
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useRouteContext.js
-function useRouteContext(opts) {
-	return useMatch({
-		...opts,
-		select: (match) => opts.select ? opts.select(match.context) : match.context
-	});
-}
-//#endregion
 //#region node_modules/react-dom/cjs/react-dom.production.js
 /**
 * @license React
@@ -4435,7 +4169,7 @@ var require_react_dom_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.useFormStatus = function() {
 		return ReactSharedInternals.H.useHostTransitionStatus();
 	};
-	exports.version = "19.2.5";
+	exports.version = "19.2.7";
 }));
 //#endregion
 //#region node_modules/react-dom/index.js
@@ -4525,8 +4259,8 @@ function useLinkProps(options, forwardedRef) {
 			}
 			if (activeOptions?.includeSearch ?? true) {
 				if (currentLocation.search !== next.search) {
-					const currentSearchEmpty = !currentLocation.search || typeof currentLocation.search === "object" && Object.keys(currentLocation.search).length === 0;
-					const nextSearchEmpty = !next.search || typeof next.search === "object" && Object.keys(next.search).length === 0;
+					const currentSearchEmpty = !currentLocation.search || typeof currentLocation.search === "object" && !hasKeys(currentLocation.search);
+					const nextSearchEmpty = !next.search || typeof next.search === "object" && !hasKeys(next.search);
 					if (!(currentSearchEmpty && nextSearchEmpty)) {
 						if (!deepEqual(currentLocation.search, next.search, {
 							partial: !exact,
@@ -4866,6 +4600,176 @@ function isCtrlEvent(e) {
 	return !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
 }
 //#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/matchContext.js
+var matchContext = import_react.createContext(void 0);
+var dummyMatchContext = import_react.createContext(void 0);
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useMatch.js
+var dummyStore = {
+	get() {},
+	subscribe() {
+		return { unsubscribe() {} };
+	}
+};
+function useStructuralSharing(opts, router) {
+	const previousResult = import_react.useRef();
+	return (slice) => {
+		const selected = opts?.select ? opts.select(slice) : slice;
+		if (opts?.structuralSharing ?? router.options.defaultStructuralSharing) return previousResult.current = replaceEqualDeep(previousResult.current, selected);
+		return selected;
+	};
+}
+/**
+* Read and select the nearest or targeted route match.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchHook
+*/
+function useMatch(opts) {
+	const router = useRouter();
+	const nearestMatchId = import_react.useContext(opts.from ? dummyMatchContext : matchContext);
+	const matchStore = opts.from ? router.stores.getRouteMatchStore(opts.from) : router.stores.matchStores.get(nearestMatchId);
+	{
+		const match = matchStore?.get();
+		if (!match) {
+			if (opts.shouldThrow ?? true) invariant();
+			return;
+		}
+		return opts.select ? opts.select(match) : match;
+	}
+	const selector = useStructuralSharing(opts, router);
+	const matchSelection = useStore(matchStore ?? dummyStore, (match) => match ? selector(match) : dummyStore);
+	if (matchSelection !== dummyStore) return matchSelection;
+	if (opts.shouldThrow ?? true) invariant();
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useLoaderData.js
+/**
+* Read and select the current route's loader data with type‑safety.
+*
+* Options:
+* - `from`/`strict`: Choose which route's data to read and strictness
+* - `select`: Map the loader data to a derived value
+* - `structuralSharing`: Enable structural sharing for stable references
+*
+* @returns The loader data (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDataHook
+*/
+function useLoaderData(opts) {
+	return useMatch({
+		from: opts.from,
+		strict: opts.strict,
+		structuralSharing: opts.structuralSharing,
+		select: (match) => {
+			return opts.select ? opts.select(match.loaderData) : match.loaderData;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useLoaderDeps.js
+/**
+* Read and select the current route's loader dependencies object.
+*
+* Options:
+* - `from`: Choose which route's loader deps to read
+* - `select`: Map the deps to a derived value
+* - `structuralSharing`: Enable structural sharing for stable references
+*
+* @returns The loader deps (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDepsHook
+*/
+function useLoaderDeps(opts) {
+	const { select, ...rest } = opts;
+	return useMatch({
+		...rest,
+		select: (match) => {
+			return select ? select(match.loaderDeps) : match.loaderDeps;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useParams.js
+/**
+* Access the current route's path parameters with type-safety.
+*
+* Options:
+* - `from`/`strict`: Specify the matched route and whether to enforce strict typing
+* - `select`: Project the params object to a derived value for memoized renders
+* - `structuralSharing`: Enable structural sharing for stable references
+* - `shouldThrow`: Throw if the route is not found in strict contexts
+*
+* @returns The params object (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useParamsHook
+*/
+function useParams(opts) {
+	return useMatch({
+		from: opts.from,
+		shouldThrow: opts.shouldThrow,
+		structuralSharing: opts.structuralSharing,
+		strict: opts.strict,
+		select: (match) => {
+			const params = opts.strict === false ? match.params : match._strictParams;
+			return opts.select ? opts.select(params) : params;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useSearch.js
+/**
+* Read and select the current route's search parameters with type-safety.
+*
+* Options:
+* - `from`/`strict`: Control which route's search is read and how strictly it's typed
+* - `select`: Map the search object to a derived value for render optimization
+* - `structuralSharing`: Enable structural sharing for stable references
+* - `shouldThrow`: Throw when the route is not found (strict contexts)
+*
+* @returns The search object (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useSearchHook
+*/
+function useSearch(opts) {
+	return useMatch({
+		from: opts.from,
+		strict: opts.strict,
+		shouldThrow: opts.shouldThrow,
+		structuralSharing: opts.structuralSharing,
+		select: (match) => {
+			return opts.select ? opts.select(match.search) : match.search;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useNavigate.js
+/**
+* Imperative navigation hook.
+*
+* Returns a stable `navigate(options)` function to change the current location
+* programmatically. Prefer the `Link` component for user-initiated navigation,
+* and use this hook from effects, callbacks, or handlers where imperative
+* navigation is required.
+*
+* Options:
+* - `from`: Optional route base used to resolve relative `to` paths.
+*
+* @returns A function that accepts `NavigateOptions`.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useNavigateHook
+*/
+function useNavigate(_defaultOpts) {
+	const router = useRouter();
+	return import_react.useCallback((options) => {
+		return router.navigate({
+			...options,
+			from: options.from ?? _defaultOpts?.from
+		});
+	}, [_defaultOpts?.from, router]);
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useRouteContext.js
+function useRouteContext(opts) {
+	return useMatch({
+		...opts,
+		select: (match) => opts.select ? opts.select(match.context) : match.context
+	});
+}
+//#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/route.js
 var Route = class extends BaseRoute {
 	/**
@@ -5101,6 +5005,98 @@ function lazyRouteComponent(importer, exportName) {
 	return lazyComp;
 }
 //#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/CatchBoundary.js
+function CatchBoundary(props) {
+	const errorComponent = props.errorComponent ?? ErrorComponent;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CatchBoundaryImpl, {
+		getResetKey: props.getResetKey,
+		onCatch: props.onCatch,
+		children: ({ error, reset }) => {
+			if (error) return import_react.createElement(errorComponent, {
+				error,
+				reset
+			});
+			return props.children;
+		}
+	});
+}
+var CatchBoundaryImpl = class extends import_react.Component {
+	constructor(..._args) {
+		super(..._args);
+		this.state = { error: null };
+	}
+	static getDerivedStateFromProps(props, state) {
+		const resetKey = props.getResetKey();
+		if (state.error && state.resetKey !== resetKey) return {
+			resetKey,
+			error: null
+		};
+		return { resetKey };
+	}
+	static getDerivedStateFromError(error) {
+		return { error };
+	}
+	reset() {
+		this.setState({ error: null });
+	}
+	componentDidCatch(error, errorInfo) {
+		if (this.props.onCatch) this.props.onCatch(error, errorInfo);
+	}
+	render() {
+		return this.props.children({
+			error: this.state.error,
+			reset: () => {
+				this.reset();
+			}
+		});
+	}
+};
+function ErrorComponent({ error }) {
+	const [show, setShow] = import_react.useState(false);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		style: {
+			padding: ".5rem",
+			maxWidth: "100%"
+		},
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				style: {
+					display: "flex",
+					alignItems: "center",
+					gap: ".5rem"
+				},
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+					style: { fontSize: "1rem" },
+					children: "Something went wrong!"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					style: {
+						appearance: "none",
+						fontSize: ".6em",
+						border: "1px solid currentColor",
+						padding: ".1rem .2rem",
+						fontWeight: "bold",
+						borderRadius: ".25rem"
+					},
+					onClick: () => setShow((d) => !d),
+					children: show ? "Hide Error" : "Show Error"
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: ".25rem" } }),
+			show ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+				style: {
+					fontSize: ".7em",
+					border: "1px solid red",
+					borderRadius: ".25rem",
+					padding: ".3rem",
+					color: "red",
+					overflow: "auto"
+				},
+				children: error.message ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: error.message }) : null
+			}) }) : null
+		]
+	});
+}
+//#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/not-found.js
 function CatchNotFound(props) {
 	const router = useRouter();
@@ -5137,18 +5133,6 @@ function DefaultGlobalNotFound() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Not Found" });
 }
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/ScriptOnce.js
-/**
-* Server-only helper to emit a script tag exactly once during SSR.
-*/
-function ScriptOnce({ children }) {
-	const router = useRouter();
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
-		nonce: router.options.ssr?.nonce,
-		dangerouslySetInnerHTML: { __html: children + ";document.currentScript.remove()" }
-	});
-}
-//#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/SafeFragment.js
 function SafeFragment(props) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: props.children });
@@ -5171,17 +5155,26 @@ function renderRouteNotFound(router, route, data) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(route.options.notFoundComponent, { ...data });
 }
 //#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/ScriptOnce.js
+/**
+* Server-only helper to emit a script tag exactly once during SSR.
+*/
+function ScriptOnce({ children }) {
+	const router = useRouter();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+		nonce: router.options.ssr?.nonce,
+		dangerouslySetInnerHTML: { __html: children + ";document.currentScript.remove()" }
+	});
+}
+//#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/scroll-restoration-inline.js
-var scroll_restoration_inline_default = "function(t){let s;try{s=JSON.parse(sessionStorage.getItem(t.storageKey)||\"{}\")}catch(e){console.error(e);return}const c=t.key||window.history.state?.__TSR_key,r=c?s[c]:void 0;if(t.shouldScrollRestoration&&r&&typeof r==\"object\"&&Object.keys(r).length>0){for(const e in r){const o=r[e];if(!o||typeof o!=\"object\")continue;const l=o.scrollX,i=o.scrollY;if(!(!Number.isFinite(l)||!Number.isFinite(i))){if(e===\"window\")window.scrollTo({top:i,left:l,behavior:t.behavior});else if(e){let n;try{n=document.querySelector(e)}catch{continue}n&&(n.scrollLeft=l,n.scrollTop=i)}}}return}const a=window.location.hash.split(\"#\",2)[1];if(a){const e=window.history.state?.__hashScrollIntoViewOptions??!0;if(e){const o=document.getElementById(a);o&&o.scrollIntoView(e)}return}window.scrollTo({top:0,left:0,behavior:t.behavior})}";
+var scroll_restoration_inline_default = "function(a,f){let l;try{l=JSON.parse(sessionStorage.getItem(a)||\"{}\")}catch{return}const n=l?.[f||history.state?.__TSR_key];let c=!1;for(const t in n){const e=n[t],o=e?.scrollX,s=e?.scrollY;if(Number.isFinite(o)&&Number.isFinite(s)){if(t===\"window\")scrollTo(o,s),c=!0;else if(t)try{const r=document.querySelector(t);r&&(r.scrollLeft=o,r.scrollTop=s)}catch{}}}if(c)return;const i=location.hash.slice(1);if(i){const t=history.state?.__hashScrollIntoViewOptions??!0;if(t){const e=document.getElementById(i);e&&e.scrollIntoView(t)}return}scrollTo(0,0)}";
 //#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/scroll-restoration-script/server.js
-var defaultInlineScrollRestorationScript = `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify({
-	storageKey,
-	shouldScrollRestoration: true
-}))})`;
-function getScrollRestorationScript(options) {
-	if (options.storageKey === "tsr-scroll-restoration-v1_3" && options.shouldScrollRestoration === true && options.key === void 0 && options.behavior === void 0) return defaultInlineScrollRestorationScript;
-	return `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(options))})`;
+var defaultInlineScrollRestorationScript = `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(storageKey))})`;
+function getScrollRestorationScript(key) {
+	if (key === void 0) return defaultInlineScrollRestorationScript;
+	return `(${scroll_restoration_inline_default})(${escapeHtml(JSON.stringify(storageKey))},${escapeHtml(JSON.stringify(key))})`;
 }
 function getScrollRestorationScriptForRouter(router) {
 	if (typeof router.options.scrollRestoration === "function" && !router.options.scrollRestoration({ location: router.latestLocation })) return null;
@@ -5190,11 +5183,7 @@ function getScrollRestorationScriptForRouter(router) {
 	const location = router.latestLocation;
 	const userKey = getKey(location);
 	if (userKey === defaultGetScrollRestorationKey(location)) return defaultInlineScrollRestorationScript;
-	return getScrollRestorationScript({
-		storageKey,
-		shouldScrollRestoration: true,
-		key: userKey
-	});
+	return getScrollRestorationScript(userKey);
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/scroll-restoration.js
@@ -5205,6 +5194,7 @@ function ScrollRestoration() {
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/Match.js
+var matchViewFieldsEqual = (a, b) => a.routeId === b.routeId && a._displayPending === b._displayPending;
 var Match = import_react.memo(function MatchImpl({ matchId }) {
 	const router = useRouter();
 	{
@@ -5227,7 +5217,7 @@ var Match = import_react.memo(function MatchImpl({ matchId }) {
 	const matchStore = router.stores.matchStores.get(matchId);
 	if (!matchStore) invariant();
 	const resetKey = useStore(router.stores.loadedAt, (loadedAt) => loadedAt);
-	const match = useStore(matchStore, (value) => value);
+	const match = useStore(matchStore, (value) => value, matchViewFieldsEqual);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MatchView, {
 		router,
 		matchId,
@@ -5287,9 +5277,9 @@ function MatchView({ router, matchId, resetKey, matchState }) {
 				})
 			})
 		})
-	}), matchState.parentRouteId === "__root__" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(OnRendered, { resetKey }), router.options.scrollRestoration && true ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollRestoration, {}) : null] }) : null] });
+	}), matchState.parentRouteId === "__root__" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(OnRendered, {}), router.options.scrollRestoration && true ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollRestoration, {}) : null] }) : null] });
 }
-function OnRendered({ resetKey }) {
+function OnRendered() {
 	useRouter();
 	return null;
 }
@@ -5419,6 +5409,36 @@ var Outlet = import_react.memo(function OutletImpl() {
 	return nextMatch;
 });
 //#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/routerStores.js
+var getStoreFactory = (opts) => {
+	return {
+		createMutableStore: createNonReactiveMutableStore,
+		createReadonlyStore: createNonReactiveReadonlyStore,
+		batch: (fn) => fn()
+	};
+};
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/router.js
+/**
+* Creates a new Router instance for React.
+*
+* Pass the returned router to `RouterProvider` to enable routing.
+* Notable options: `routeTree` (your route definitions) and `context`
+* (required if the root route was created with `createRootRouteWithContext`).
+*
+* @param options Router options used to configure the router.
+* @returns A Router instance to be provided to `RouterProvider`.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/createRouterFunction
+*/
+var createRouter = (options) => {
+	return new Router(options);
+};
+var Router = class extends RouterCore {
+	constructor(options) {
+		super(options, getStoreFactory);
+	}
+};
+//#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/Matches.js
 /**
 * Internal component that renders the router's active match tree with
@@ -5450,43 +5470,13 @@ function MatchesInner() {
 	});
 }
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/routerStores.js
-var getStoreFactory = (opts) => {
-	return {
-		createMutableStore: createNonReactiveMutableStore,
-		createReadonlyStore: createNonReactiveReadonlyStore,
-		batch: (fn) => fn()
-	};
-};
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/router.js
-/**
-* Creates a new Router instance for React.
-*
-* Pass the returned router to `RouterProvider` to enable routing.
-* Notable options: `routeTree` (your route definitions) and `context`
-* (required if the root route was created with `createRootRouteWithContext`).
-*
-* @param options Router options used to configure the router.
-* @returns A Router instance to be provided to `RouterProvider`.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/createRouterFunction
-*/
-var createRouter = (options) => {
-	return new Router(options);
-};
-var Router = class extends RouterCore {
-	constructor(options) {
-		super(options, getStoreFactory);
-	}
-};
-//#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/RouterProvider.js
 /**
 * Low-level provider that places the router into React context and optionally
 * updates router options from props. Most apps should use `RouterProvider`.
 */
 function RouterContextProvider({ router, children, ...rest }) {
-	if (Object.keys(rest).length > 0) router.update({
+	if (hasKeys(rest)) router.update({
 		...router.options,
 		...rest,
 		context: {
@@ -5519,8 +5509,13 @@ function RouterProvider({ router, ...rest }) {
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/Asset.js
+var noopScriptHandler = () => {};
+function setScriptAttrs(script, attrs) {
+	if (!attrs) return;
+	for (const [key, value] of Object.entries(attrs)) if (key !== "suppressHydrationWarning" && value !== void 0 && value !== false) script.setAttribute(key, typeof value === "boolean" ? "" : String(value));
+}
 function Asset(asset) {
-	const { attrs, children, nonce } = asset;
+	const { attrs, children, nonce, preventScriptHoist } = asset;
 	switch (asset.tag) {
 		case "title": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("title", {
 			...attrs,
@@ -5546,12 +5541,13 @@ function Asset(asset) {
 			});
 		case "script": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Script, {
 			attrs,
+			preventScriptHoist,
 			children
 		});
 		default: return null;
 	}
 }
-function Script({ attrs, children }) {
+function Script({ attrs, children, preventScriptHoist }) {
 	useRouter();
 	useHydrated();
 	const dataScript = typeof attrs?.type === "string" && attrs.type !== "" && attrs.type !== "text/javascript" && attrs.type !== "module";
@@ -5566,42 +5562,43 @@ function Script({ attrs, children }) {
 					return attrs.src;
 				}
 			})();
-			if (Array.from(document.querySelectorAll("script[src]")).find((el) => el.src === normSrc)) return;
+			for (const el of document.querySelectorAll("script[src]")) if (el.src === normSrc) return;
 			const script = document.createElement("script");
-			for (const [key, value] of Object.entries(attrs)) if (key !== "suppressHydrationWarning" && value !== void 0 && value !== false) script.setAttribute(key, typeof value === "boolean" ? "" : String(value));
+			setScriptAttrs(script, attrs);
 			document.head.appendChild(script);
-			return () => {
-				if (script.parentNode) script.parentNode.removeChild(script);
-			};
+			return () => script.remove();
 		}
 		if (typeof children === "string") {
 			const typeAttr = typeof attrs?.type === "string" ? attrs.type : "text/javascript";
 			const nonceAttr = typeof attrs?.nonce === "string" ? attrs.nonce : void 0;
-			if (Array.from(document.querySelectorAll("script:not([src])")).find((el) => {
-				if (!(el instanceof HTMLScriptElement)) return false;
+			for (const el of document.querySelectorAll("script:not([src])")) {
+				if (!(el instanceof HTMLScriptElement)) continue;
 				const sType = el.getAttribute("type") ?? "text/javascript";
 				const sNonce = el.getAttribute("nonce") ?? void 0;
-				return el.textContent === children && sType === typeAttr && sNonce === nonceAttr;
-			})) return;
+				if (el.textContent === children && sType === typeAttr && sNonce === nonceAttr) return;
+			}
 			const script = document.createElement("script");
 			script.textContent = children;
-			if (attrs) {
-				for (const [key, value] of Object.entries(attrs)) if (key !== "suppressHydrationWarning" && value !== void 0 && value !== false) script.setAttribute(key, typeof value === "boolean" ? "" : String(value));
-			}
+			setScriptAttrs(script, attrs);
 			document.head.appendChild(script);
-			return () => {
-				if (script.parentNode) script.parentNode.removeChild(script);
-			};
+			return () => script.remove();
 		}
 	}, [
 		attrs,
 		children,
 		dataScript
 	]);
-	if (attrs?.src) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
-		...attrs,
-		suppressHydrationWarning: true
-	});
+	if (attrs?.src) {
+		if (!preventScriptHoist) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+			...attrs,
+			suppressHydrationWarning: true
+		});
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+			...attrs,
+			onLoad: noopScriptHandler,
+			suppressHydrationWarning: true
+		});
+	}
 	if (typeof children === "string") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
 		...attrs,
 		dangerouslySetInnerHTML: { __html: children },
@@ -5612,7 +5609,7 @@ function Script({ attrs, children }) {
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/headContentUtils.js
 function buildTagsFromMatches(router, nonce, matches, assetCrossOrigin) {
-	const routeMeta = matches.map((match) => match.meta).filter(Boolean);
+	const routeMeta = matches.map((match) => match.meta).filter((meta) => meta !== void 0);
 	const resultMeta = [];
 	const metaByAttribute = {};
 	let title;
@@ -5657,7 +5654,7 @@ function buildTagsFromMatches(router, nonce, matches, assetCrossOrigin) {
 		}
 	});
 	resultMeta.reverse();
-	const constructedLinks = matches.map((match) => match.links).filter(Boolean).flat(1).map((link) => ({
+	const constructedLinks = matches.flatMap((match) => match.links ?? []).filter((link) => link !== void 0).map((link) => ({
 		tag: "link",
 		attrs: {
 			...link,
@@ -5665,44 +5662,46 @@ function buildTagsFromMatches(router, nonce, matches, assetCrossOrigin) {
 		}
 	}));
 	const manifest = router.ssr?.manifest;
-	const assetLinks = matches.map((match) => manifest?.routes[match.routeId]?.assets ?? []).filter(Boolean).flat(1).flatMap((asset) => {
-		if (asset.tag === "link") {
-			if (isInlinableStylesheet(manifest, asset)) return [];
-			return [{
-				tag: "link",
-				attrs: {
-					...asset.attrs,
-					crossOrigin: getAssetCrossOrigin(assetCrossOrigin, "stylesheet") ?? asset.attrs?.crossOrigin,
-					suppressHydrationWarning: true,
-					nonce
-				}
-			}];
-		}
-		if (asset.tag === "style") return [{
+	const manifestCssTags = [];
+	if (manifest) {
+		matches.forEach((match) => {
+			(manifest.routes[match.routeId]?.css)?.forEach((link) => {
+				const resolvedLink = resolveManifestCssLink(link);
+				manifestCssTags.push({
+					tag: "link",
+					attrs: {
+						rel: "stylesheet",
+						...resolvedLink,
+						crossOrigin: getAssetCrossOrigin(assetCrossOrigin, "stylesheet") ?? resolvedLink.crossOrigin,
+						suppressHydrationWarning: true,
+						nonce
+					}
+				});
+			});
+		});
+		if (manifest.inlineStyle) manifestCssTags.push({
 			tag: "style",
 			attrs: {
-				...asset.attrs,
+				...manifest.inlineStyle.attrs,
 				nonce
 			},
-			children: asset.children,
-			...asset.inlineCss ? { inlineCss: true } : {}
-		}];
-		return [];
-	});
-	const preloadLinks = [];
-	matches.map((match) => router.looseRoutesById[match.routeId]).forEach((route) => router.ssr?.manifest?.routes[route.id]?.preloads?.filter(Boolean).forEach((preload) => {
-		const preloadLink = resolveManifestAssetLink(preload);
-		preloadLinks.push({
-			tag: "link",
-			attrs: {
-				rel: "modulepreload",
-				href: preloadLink.href,
-				crossOrigin: getAssetCrossOrigin(assetCrossOrigin, "modulepreload") ?? preloadLink.crossOrigin,
-				nonce
-			}
+			children: manifest.inlineStyle.children,
+			inlineCss: true
 		});
-	}));
-	const styles = matches.map((match) => match.styles).flat(1).filter(Boolean).map(({ children, ...attrs }) => ({
+	}
+	const preloadLinks = [];
+	if (manifest) matches.forEach((match) => {
+		manifest.routes[match.routeId]?.preloads?.forEach((preload) => {
+			preloadLinks.push({
+				tag: "link",
+				attrs: {
+					...getScriptPreloadAttrs(manifest, preload, assetCrossOrigin),
+					nonce
+				}
+			});
+		});
+	});
+	const styles = matches.flatMap((match) => match.styles ?? []).filter((style) => style !== void 0).map(({ children, ...attrs }) => ({
 		tag: "style",
 		attrs: {
 			...attrs,
@@ -5710,7 +5709,7 @@ function buildTagsFromMatches(router, nonce, matches, assetCrossOrigin) {
 		},
 		children
 	}));
-	const headScripts = matches.map((match) => match.headScripts).flat(1).filter(Boolean).map(({ children, ...script }) => ({
+	const headScripts = matches.flatMap((match) => match.headScripts ?? []).filter((script) => script !== void 0).map(({ children, ...script }) => ({
 		tag: "script",
 		attrs: {
 			...script,
@@ -5718,14 +5717,14 @@ function buildTagsFromMatches(router, nonce, matches, assetCrossOrigin) {
 		},
 		children
 	}));
-	return uniqBy([
-		...resultMeta,
-		...preloadLinks,
-		...constructedLinks,
-		...assetLinks,
-		...styles,
-		...headScripts
-	], (d) => JSON.stringify(d));
+	const tags = [];
+	appendUniqueUserTags(tags, resultMeta);
+	tags.push(...preloadLinks);
+	appendUniqueUserTags(tags, constructedLinks);
+	tags.push(...manifestCssTags);
+	appendUniqueUserTags(tags, styles);
+	appendUniqueUserTags(tags, headScripts);
+	return tags;
 }
 /**
 * Build the list of head/link/meta/script tags to render for active matches.
@@ -5736,15 +5735,6 @@ var useTags = (assetCrossOrigin) => {
 	const nonce = router.options.ssr?.nonce;
 	return buildTagsFromMatches(router, nonce, router.stores.matches.get(), assetCrossOrigin);
 };
-function uniqBy(arr, fn) {
-	const seen = /* @__PURE__ */ new Set();
-	return arr.filter((item) => {
-		const key = fn(item);
-		if (seen.has(key)) return false;
-		seen.add(key);
-		return true;
-	});
-}
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/HeadContent.js
 /**
@@ -5774,16 +5764,19 @@ var Scripts = () => {
 		const assetScripts = [];
 		const manifest = router.ssr?.manifest;
 		if (!manifest) return [];
-		matches.map((match) => router.looseRoutesById[match.routeId]).forEach((route) => manifest.routes[route.id]?.assets?.filter((d) => d.tag === "script").forEach((asset) => {
-			assetScripts.push({
+		for (const match of matches) {
+			const scripts = manifest.routes[match.routeId]?.scripts;
+			if (!scripts) continue;
+			for (const asset of scripts) assetScripts.push({
 				tag: "script",
 				attrs: {
 					...asset.attrs,
 					nonce
 				},
-				children: asset.children
+				children: asset.children,
+				...typeof asset.attrs?.src === "string" ? { preventScriptHoist: true } : {}
 			});
-		}));
+		}
 		return assetScripts;
 	};
 	const getScripts = (matches) => matches.map((match) => match.scripts).flat(1).filter(Boolean).map(({ children, ...script }) => ({
@@ -5804,14 +5797,635 @@ var Scripts = () => {
 	return renderScripts(router, useStore(router.stores.matches, getScripts, deepEqual), assetScripts);
 };
 function renderScripts(router, scripts, assetScripts) {
-	let serverBufferedScript = void 0;
-	if (router.serverSsr) serverBufferedScript = router.serverSsr.takeBufferedScripts();
 	const allScripts = [...scripts, ...assetScripts];
-	if (serverBufferedScript) allScripts.unshift(serverBufferedScript);
+	if (router.serverSsr) {
+		const serverBufferedScript = router.serverSsr.takeBufferedScripts();
+		if (serverBufferedScript) allScripts.unshift(serverBufferedScript);
+	}
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: allScripts.map((asset, i) => /* @__PURE__ */ (0, import_react.createElement)(Asset, {
 		...asset,
 		key: `tsr-scripts-${asset.tag}-${i}`
 	})) });
+}
+//#endregion
+//#region node_modules/@tanstack/router-core/dist/esm/ssr/handlerCallback.js
+function isSsrResponse(value) {
+	return typeof value === "object" && value !== null && "response" in value && "serverSsrCleanup" in value;
+}
+function normalizeSsrResponse(result) {
+	return isSsrResponse(result) ? result : {
+		response: result,
+		serverSsrCleanup: "none"
+	};
+}
+function createSsrStreamResponse(router, response) {
+	if (!response.body) throw new Error("Invariant failed: SSR stream response requires a body");
+	let disposed = false;
+	return {
+		response,
+		serverSsrCleanup: "stream",
+		async dispose(reason) {
+			if (disposed) return;
+			disposed = true;
+			try {
+				await response.body.cancel(reason);
+			} catch {}
+			router.serverSsr?.cleanup();
+		}
+	};
+}
+async function replaceSsrResponse(result, response, reason) {
+	const ssrResponse = normalizeSsrResponse(result);
+	if (ssrResponse.serverSsrCleanup === "stream") await ssrResponse.dispose(reason);
+	return {
+		response,
+		serverSsrCleanup: "none"
+	};
+}
+async function stripSsrResponseBody(result, reason) {
+	const ssrResponse = normalizeSsrResponse(result);
+	if (ssrResponse.serverSsrCleanup === "stream") await ssrResponse.dispose(reason);
+	return {
+		response: new Response(null, ssrResponse.response),
+		serverSsrCleanup: "none"
+	};
+}
+function defineHandlerCallback(handler) {
+	return handler;
+}
+//#endregion
+//#region node_modules/@tanstack/router-core/dist/esm/ssr/transformStreamWithRouter.js
+function transformReadableStreamWithRouter(router, routerStream, opts) {
+	return transformStreamWithRouter(router, routerStream, opts);
+}
+function transformPipeableStreamWithRouter(router, routerStream, opts) {
+	return Readable.fromWeb(transformStreamWithRouter(router, Readable.toWeb(routerStream), opts));
+}
+var MIN_CLOSING_TAG_LENGTH = 4;
+var DEFAULT_SERIALIZATION_TIMEOUT_MS = 6e4;
+var DEFAULT_LIFETIME_TIMEOUT_MS = DEFAULT_SERIALIZATION_TIMEOUT_MS * 2;
+var MAX_LEFTOVER_CHARS = 2048;
+var MAX_TAIL_CHARS = 64 * 1024;
+var MAX_ROUTER_HTML_CHARS = 16 * 1024 * 1024;
+var MAX_PENDING_WRITE_CHARS = 16 * 1024 * 1024;
+var MergeState = {
+	ReadingBody: 0,
+	HoldingTail: 1,
+	AppDone: 2,
+	Draining: 3,
+	Done: 4
+};
+var textEncoder = new TextEncoder();
+var noop$1 = () => {};
+var resolvedPromise = Promise.resolve();
+function findHtmlBoundary(str) {
+	let lastClosingTagEnd = -1;
+	let searchFrom = str.length - MIN_CLOSING_TAG_LENGTH;
+	while (searchFrom >= 0) {
+		const openSlash = str.lastIndexOf("</", searchFrom);
+		if (openSlash === -1) break;
+		if ((str.charCodeAt(openSlash + 2) | 32) === 98 && (str.charCodeAt(openSlash + 3) | 32) === 111 && (str.charCodeAt(openSlash + 4) | 32) === 100 && (str.charCodeAt(openSlash + 5) | 32) === 121 && str.charCodeAt(openSlash + 6) === 62) return -openSlash - 2;
+		if (lastClosingTagEnd === -1) {
+			let i = openSlash + 2;
+			const startCode = str.charCodeAt(i);
+			if (startCode >= 97 && startCode <= 122 || startCode >= 65 && startCode <= 90) {
+				i++;
+				while (i < str.length) {
+					const code = str.charCodeAt(i);
+					if (code >= 97 && code <= 122 || code >= 65 && code <= 90 || code >= 48 && code <= 57 || code === 95 || code === 58 || code === 46 || code === 45) i++;
+					else break;
+				}
+				if (str.charCodeAt(i) === 62) lastClosingTagEnd = i + 1;
+			}
+		}
+		searchFrom = openSlash - 1;
+	}
+	return lastClosingTagEnd;
+}
+function safeReleaseReader(reader) {
+	try {
+		reader.releaseLock();
+		return true;
+	} catch {
+		return false;
+	}
+}
+/**
+* Cancel a reader without producing an unhandled rejection. `reader.cancel()`
+* can reject (e.g. when the underlying source's cancel() throws), and
+* downstream cancel() should still wait for upstream teardown when possible.
+*/
+function safeCancelReader(reader, reason) {
+	let cancelPromise;
+	try {
+		cancelPromise = reader.cancel(reason);
+	} catch {}
+	if (!safeReleaseReader(reader) && cancelPromise) return cancelPromise.then(noop$1, noop$1).then(() => {
+		safeReleaseReader(reader);
+	});
+	return cancelPromise ? cancelPromise.then(noop$1, noop$1) : resolvedPromise;
+}
+function createReaderState(appStream) {
+	const reader = appStream.getReader();
+	let released = false;
+	return {
+		reader,
+		cancel: (reason) => {
+			if (released) return resolvedPromise;
+			released = true;
+			return safeCancelReader(reader, reason);
+		},
+		release: () => {
+			if (released) return;
+			released = true;
+			safeReleaseReader(reader);
+		}
+	};
+}
+function createAbortNotifier(opts) {
+	let abortNotified = false;
+	return (reason) => {
+		if (abortNotified) return;
+		abortNotified = true;
+		try {
+			opts?.onAbort?.(reason);
+		} catch {}
+	};
+}
+function transformStreamWithRouter(router, appStream, opts) {
+	const serverSsr = router.serverSsr;
+	if (!serverSsr) throw new Error("Invariant failed: router.serverSsr is required");
+	if (serverSsr.reserveStreamFastPath()) return makeFastPathStream(appStream, opts, serverSsr);
+	return makeMainStream(serverSsr, appStream, opts);
+}
+function makeFastPathStream(appStream, opts, serverSsr) {
+	let cleanedUp = false;
+	let controller;
+	let state = MergeState.ReadingBody;
+	let lifetimeTimeoutHandle;
+	let stopListeningToInjectedHtml;
+	const readerState = createReaderState(appStream);
+	const notifyAbort = createAbortNotifier(opts);
+	const isDone = () => state === MergeState.Done;
+	let renderFinished = false;
+	const finishSsrRendering = () => {
+		if (!serverSsr || renderFinished) return true;
+		renderFinished = true;
+		try {
+			serverSsr.setRenderFinished();
+			return true;
+		} catch (error) {
+			safeError(error);
+			cleanup(error);
+			return false;
+		}
+	};
+	const cleanup = (reason, cancelReader = true) => {
+		if (cleanedUp) return resolvedPromise;
+		cleanedUp = true;
+		if (lifetimeTimeoutHandle !== void 0) {
+			clearTimeout(lifetimeTimeoutHandle);
+			lifetimeTimeoutHandle = void 0;
+		}
+		try {
+			stopListeningToInjectedHtml?.();
+		} catch {}
+		stopListeningToInjectedHtml = void 0;
+		if (cancelReader) notifyAbort(reason);
+		const readerDone = cancelReader ? readerState.cancel(reason) : (readerState.release(), resolvedPromise);
+		if (serverSsr) try {
+			serverSsr.cleanup();
+		} catch (error) {
+			console.error("Error in SSR cleanup:", error);
+		}
+		return readerDone;
+	};
+	const safeClose = () => {
+		if (isDone()) return;
+		state = MergeState.Done;
+		try {
+			controller?.close();
+		} catch {}
+	};
+	const safeError = (error) => {
+		if (isDone()) return;
+		state = MergeState.Done;
+		try {
+			controller?.error(error);
+		} catch {}
+	};
+	if (serverSsr) stopListeningToInjectedHtml = serverSsr.onInjectedHtml(() => {
+		const err = /* @__PURE__ */ new Error("SSR router HTML injected during fast path");
+		safeError(err);
+		cleanup(err);
+	});
+	const lifetimeMs = opts?.lifetimeMs ?? DEFAULT_LIFETIME_TIMEOUT_MS;
+	lifetimeTimeoutHandle = setTimeout(() => {
+		if (!cleanedUp && !isDone()) {
+			const err = /* @__PURE__ */ new Error("Stream lifetime exceeded");
+			console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
+			safeError(err);
+			cleanup(err);
+		}
+	}, lifetimeMs);
+	return new ReadableStream$1({
+		start(c) {
+			controller = c;
+		},
+		async pull(c) {
+			if (cleanedUp || isDone()) return;
+			try {
+				const { done, value } = await readerState.reader.read();
+				if (!done) {
+					if (!cleanedUp && !isDone()) c.enqueue(value);
+					return;
+				}
+				if (cleanedUp || isDone()) return;
+				if (!finishSsrRendering()) return;
+				safeClose();
+				return cleanup(void 0, false);
+			} catch (error) {
+				if (cleanedUp) return;
+				console.error("Error reading appStream:", error);
+				if (state < MergeState.AppDone) try {
+					serverSsr?.setRenderFinished();
+				} catch {}
+				safeError(error);
+				return cleanup(error);
+			} finally {
+				if (cleanedUp || isDone()) readerState.release();
+			}
+		},
+		cancel(reason) {
+			state = MergeState.Done;
+			return cleanup(reason);
+		}
+	});
+}
+function makeMainStream(serverSsr, appStream, opts) {
+	let stopListeningToInjectedHtml;
+	let stopListeningToSerializationFinished;
+	let serializationTimeoutHandle;
+	let lifetimeTimeoutHandle;
+	let cleanedUp = false;
+	let controller;
+	let closeWhenDrained = false;
+	let state = MergeState.ReadingBody;
+	const readerState = createReaderState(appStream);
+	const notifyAbort = createAbortNotifier(opts);
+	const pendingWrites = [];
+	let pendingWriteHead = 0;
+	let pendingWriteChars = 0;
+	function clearPending() {
+		pendingWrites.length = 0;
+		pendingWriteHead = 0;
+		pendingWriteChars = 0;
+	}
+	let drainResolve = null;
+	const waitForDrain = () => new Promise((r) => {
+		drainResolve = r;
+	});
+	const signalDrain = () => {
+		if (drainResolve) {
+			const r = drainResolve;
+			drainResolve = null;
+			r();
+		}
+	};
+	const isDone = () => state === MergeState.Done;
+	function drainPending() {
+		if (!controller || isDone()) return;
+		while (pendingWriteHead < pendingWrites.length) {
+			const ds = controller.desiredSize;
+			if (ds !== null && ds <= 0) return;
+			const next = pendingWrites[pendingWriteHead];
+			pendingWrites[pendingWriteHead] = "";
+			pendingWriteHead++;
+			pendingWriteChars -= next.length;
+			try {
+				controller.enqueue(textEncoder.encode(next));
+			} catch (error) {
+				safeError(error);
+				cleanup(error);
+				return;
+			}
+		}
+		if (pendingWriteHead >= pendingWrites.length) {
+			pendingWrites.length = 0;
+			pendingWriteHead = 0;
+		}
+		if (closeWhenDrained && pendingWriteHead >= pendingWrites.length) {
+			closeWhenDrained = false;
+			safeClose();
+			cleanup(void 0, false);
+		}
+	}
+	/**
+	* Enqueue a string chunk through the backpressure queue. Stored as a
+	* string and encoded only when the downstream actually accepts the chunk
+	* — keeps native-memory pressure inside the controller's queue (which
+	* honors desiredSize) rather than ours.
+	*/
+	function writeChunk(chunk) {
+		if (cleanedUp || isDone()) return;
+		if (!chunk.length) return;
+		if (pendingWriteChars + chunk.length > MAX_PENDING_WRITE_CHARS) {
+			const err = /* @__PURE__ */ new Error("SSR stream pending output exceeded maximum buffer");
+			safeError(err);
+			cleanup(err);
+			return;
+		}
+		pendingWrites.push(chunk);
+		pendingWriteChars += chunk.length;
+		drainPending();
+	}
+	function safeClose() {
+		if (isDone()) return;
+		state = MergeState.Done;
+		try {
+			controller?.close();
+		} catch {}
+	}
+	function safeError(error) {
+		if (isDone()) return;
+		state = MergeState.Done;
+		try {
+			controller?.error(error);
+		} catch {}
+	}
+	/**
+	* Cleanup with guards; must be idempotent.
+	*/
+	function cleanup(reason, cancelReader = true) {
+		if (cleanedUp) return resolvedPromise;
+		cleanedUp = true;
+		try {
+			stopListeningToInjectedHtml?.();
+			stopListeningToSerializationFinished?.();
+		} catch {}
+		stopListeningToInjectedHtml = void 0;
+		stopListeningToSerializationFinished = void 0;
+		if (serializationTimeoutHandle !== void 0) {
+			clearTimeout(serializationTimeoutHandle);
+			serializationTimeoutHandle = void 0;
+		}
+		if (lifetimeTimeoutHandle !== void 0) {
+			clearTimeout(lifetimeTimeoutHandle);
+			lifetimeTimeoutHandle = void 0;
+		}
+		clearPendingRouterHtml();
+		leftover = "";
+		pendingTail = "";
+		clearPending();
+		if (cancelReader) notifyAbort(reason);
+		const readerDone = cancelReader ? readerState.cancel(reason) : (readerState.release(), resolvedPromise);
+		signalDrain();
+		try {
+			serverSsr.cleanup();
+		} catch (error) {
+			console.error("Error in SSR cleanup:", error);
+		}
+		return readerDone;
+	}
+	const textDecoder = new TextDecoder();
+	const pendingRouterHtml = [];
+	let pendingRouterHtmlChars = 0;
+	let leftover = "";
+	let pendingTail = "";
+	let streamBarrierLifted = false;
+	let streamBarrierMarkerSeen = false;
+	let serializationFinished = false;
+	function noteBarrierMarker(chunk) {
+		if (streamBarrierMarkerSeen) return;
+		if (chunk.includes("$tsr-stream-barrier")) streamBarrierMarkerSeen = true;
+	}
+	function liftBarrierAfterBoundary() {
+		if (streamBarrierLifted) return;
+		if (!streamBarrierMarkerSeen) return;
+		streamBarrierLifted = true;
+		serverSsr.liftScriptBarrier();
+	}
+	const stream = new ReadableStream$1({
+		start(c) {
+			controller = c;
+			drainPending();
+		},
+		pull() {
+			drainPending();
+			signalDrain();
+		},
+		cancel(reason) {
+			state = MergeState.Done;
+			return cleanup(reason);
+		}
+	});
+	function drainRouterHtml() {
+		if (cleanedUp || isDone()) return;
+		let html;
+		try {
+			html = serverSsr.takeBufferedHtml();
+		} catch (error) {
+			safeError(error);
+			cleanup(error);
+			return;
+		}
+		if (!html) return;
+		if (state >= MergeState.Draining) {
+			const err = /* @__PURE__ */ new Error("SSR router HTML injected after stream finalization");
+			safeError(err);
+			cleanup(err);
+			return;
+		}
+		if (state === MergeState.HoldingTail) {
+			flushPendingRouterHtml();
+			writeChunk(html);
+		} else {
+			if (pendingRouterHtmlChars + html.length > MAX_ROUTER_HTML_CHARS) {
+				const err = /* @__PURE__ */ new Error("SSR router HTML exceeded maximum buffer");
+				safeError(err);
+				cleanup(err);
+				return;
+			}
+			pendingRouterHtml.push(html);
+			pendingRouterHtmlChars += html.length;
+		}
+	}
+	function flushPendingRouterHtml() {
+		if (!pendingRouterHtml.length) return;
+		for (const html of pendingRouterHtml) writeChunk(html);
+		clearPendingRouterHtml();
+	}
+	function clearPendingRouterHtml() {
+		pendingRouterHtml.length = 0;
+		pendingRouterHtmlChars = 0;
+	}
+	function appendTail(chunk) {
+		pendingTail += chunk;
+		if (pendingTail.length > MAX_TAIL_CHARS) throw new Error("SSR stream tail exceeded maximum buffer");
+	}
+	function waitForBackpressure() {
+		return !!(controller && controller.desiredSize !== null && controller.desiredSize <= 0);
+	}
+	function startSerializationTimeout() {
+		if (cleanedUp || isDone()) return;
+		if (serializationTimeoutHandle !== void 0) return;
+		const timeoutMs = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
+		serializationTimeoutHandle = setTimeout(() => {
+			if (!cleanedUp && !isDone()) {
+				const err = /* @__PURE__ */ new Error("Serialization timeout after app render finished");
+				console.error("Serialization timeout after app render finished");
+				safeError(err);
+				cleanup(err);
+			}
+		}, timeoutMs);
+	}
+	/**
+	* Finish only when app done and serialization complete. Queues final
+	* output and requests close-when-drained so we don't close ahead of
+	* pending writes still waiting on downstream capacity.
+	*/
+	function tryFinish() {
+		if (state !== MergeState.AppDone || !serializationFinished) return;
+		if (cleanedUp || isDone()) return;
+		if (serializationTimeoutHandle !== void 0) {
+			clearTimeout(serializationTimeoutHandle);
+			serializationTimeoutHandle = void 0;
+		}
+		drainRouterHtml();
+		if (cleanedUp || isDone()) return;
+		const decoderRemainder = textDecoder.decode();
+		if (leftover) writeChunk(leftover);
+		if (cleanedUp || isDone()) return;
+		if (decoderRemainder) writeChunk(decoderRemainder);
+		if (cleanedUp || isDone()) return;
+		flushPendingRouterHtml();
+		if (cleanedUp || isDone()) return;
+		if (pendingTail) writeChunk(pendingTail);
+		if (cleanedUp || isDone()) return;
+		leftover = "";
+		pendingTail = "";
+		state = MergeState.Draining;
+		closeWhenDrained = true;
+		drainPending();
+	}
+	function finishAppRendering() {
+		if (state >= MergeState.AppDone) return;
+		state = MergeState.AppDone;
+		try {
+			serverSsr.setRenderFinished();
+		} catch (error) {
+			safeError(error);
+			cleanup(error);
+			return;
+		}
+		drainRouterHtml();
+		if (cleanedUp || isDone()) return;
+		serializationFinished = serializationFinished || serverSsr.isSerializationFinished();
+		if (serializationFinished) tryFinish();
+		else startSerializationTimeout();
+	}
+	const timeoutMs = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
+	const lifetimeMs = opts?.lifetimeMs ?? timeoutMs * 2;
+	lifetimeTimeoutHandle = setTimeout(() => {
+		if (!cleanedUp && !isDone()) {
+			const err = /* @__PURE__ */ new Error("Stream lifetime exceeded");
+			console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
+			safeError(err);
+			cleanup(err);
+		}
+	}, lifetimeMs);
+	stopListeningToInjectedHtml = serverSsr.onInjectedHtml(() => {
+		drainRouterHtml();
+	});
+	stopListeningToSerializationFinished = serverSsr.onSerializationFinished(() => {
+		serializationFinished = true;
+		drainRouterHtml();
+		tryFinish();
+	});
+	drainRouterHtml();
+	if (cleanedUp || isDone()) return stream;
+	serializationFinished = serializationFinished || serverSsr.isSerializationFinished();
+	if (serializationFinished) {
+		drainRouterHtml();
+		if (cleanedUp || isDone()) return stream;
+	}
+	(async () => {
+		try {
+			while (true) {
+				if (waitForBackpressure()) {
+					await waitForDrain();
+					if (cleanedUp || isDone()) return;
+				}
+				const { done, value } = await readerState.reader.read();
+				if (done) break;
+				if (cleanedUp || isDone()) return;
+				const text = typeof value === "string" ? value : textDecoder.decode(value, { stream: true });
+				const chunkString = leftover ? leftover + text : text;
+				if (state >= MergeState.HoldingTail) {
+					appendTail(chunkString);
+					leftover = "";
+					continue;
+				}
+				const boundary = findHtmlBoundary(chunkString);
+				if (boundary < -1) {
+					const bodyEndIndex = -boundary - 2;
+					state = MergeState.HoldingTail;
+					appendTail(chunkString.slice(bodyEndIndex));
+					const bodyChunk = chunkString.slice(0, bodyEndIndex);
+					writeChunk(bodyChunk);
+					if (cleanedUp || isDone()) return;
+					noteBarrierMarker(bodyChunk);
+					liftBarrierAfterBoundary();
+					if (cleanedUp || isDone()) return;
+					flushPendingRouterHtml();
+					leftover = "";
+					continue;
+				}
+				const lastClosingTagEnd = boundary;
+				if (lastClosingTagEnd > 0) {
+					const safeChunk = chunkString.slice(0, lastClosingTagEnd);
+					writeChunk(safeChunk);
+					if (cleanedUp || isDone()) return;
+					noteBarrierMarker(safeChunk);
+					liftBarrierAfterBoundary();
+					if (cleanedUp || isDone()) return;
+					flushPendingRouterHtml();
+					leftover = chunkString.slice(lastClosingTagEnd);
+					if (leftover.length > MAX_LEFTOVER_CHARS) {
+						noteBarrierMarker(leftover);
+						writeChunk(leftover.slice(0, leftover.length - MAX_LEFTOVER_CHARS));
+						leftover = leftover.slice(-2048);
+					}
+				} else {
+					const combined = chunkString;
+					if (combined.length > MAX_LEFTOVER_CHARS) {
+						noteBarrierMarker(combined);
+						const flushUpto = combined.length - MAX_LEFTOVER_CHARS;
+						writeChunk(combined.slice(0, flushUpto));
+						leftover = combined.slice(flushUpto);
+					} else leftover = combined;
+				}
+			}
+			if (cleanedUp || isDone()) return;
+			finishAppRendering();
+		} catch (error) {
+			if (cleanedUp) return;
+			console.error("Error reading appStream:", error);
+			if (state < MergeState.AppDone) try {
+				serverSsr.setRenderFinished();
+			} catch {}
+			safeError(error);
+			cleanup(error);
+		} finally {
+			readerState.release();
+		}
+	})().catch((error) => {
+		if (cleanedUp) return;
+		console.error("Error in stream transform:", error);
+		safeError(error);
+		cleanup(error);
+	});
+	return stream;
 }
 //#endregion
 //#region node_modules/react-dom/cjs/react-dom-server-legacy.node.production.js
@@ -5868,7 +6482,7 @@ var require_react_dom_server_legacy_node_production = /* @__PURE__ */ __commonJS
 		illegalAttributeNameCache[attributeName] = !0;
 		return !1;
 	}
-	var unitlessNumbers = new Set("animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(" ")), aliases = new Map([
+	var unitlessNumbers = new Set("animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(" ")), aliases = /* @__PURE__ */ new Map([
 		["acceptCharset", "accept-charset"],
 		["htmlFor", "for"],
 		["httpEquiv", "http-equiv"],
@@ -9645,7 +10259,7 @@ var require_react_dom_server_legacy_node_production = /* @__PURE__ */ __commonJS
 	exports.renderToString = function(children, options) {
 		return renderToStringImpl(children, options, !1, "The server used \"renderToString\" which does not support Suspense. If you intended for this Suspense boundary to render the fallback content on the server consider throwing an Error somewhere within the Suspense boundary. If you intended to have the server wait for the suspended component please switch to \"renderToPipeableStream\" which supports Suspense on the server");
 	};
-	exports.version = "19.2.5";
+	exports.version = "19.2.7";
 }));
 //#endregion
 //#region node_modules/react-dom/cjs/react-dom-server.node.production.js
@@ -9672,17 +10286,17 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 	var currentView = null, writtenBytes = 0, destinationHasCapacity$1 = !0;
 	function writeChunk(destination, chunk) {
 		if ("string" === typeof chunk) {
-			if (0 !== chunk.length) if (2048 < 3 * chunk.length) 0 < writtenBytes && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = new Uint8Array(2048), writtenBytes = 0), writeToDestination(destination, chunk);
+			if (0 !== chunk.length) if (2048 < 3 * chunk.length) 0 < writtenBytes && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = 0), writeToDestination(destination, chunk);
 			else {
 				var target = currentView;
 				0 < writtenBytes && (target = currentView.subarray(writtenBytes));
 				target = textEncoder.encodeInto(chunk, target);
 				var read = target.read;
 				writtenBytes += target.written;
-				read < chunk.length && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = new Uint8Array(2048), writtenBytes = textEncoder.encodeInto(chunk.slice(read), currentView).written);
-				2048 === writtenBytes && (writeToDestination(destination, currentView), currentView = new Uint8Array(2048), writtenBytes = 0);
+				read < chunk.length && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = textEncoder.encodeInto(chunk.slice(read), currentView).written);
+				2048 === writtenBytes && (writeToDestination(destination, currentView), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = 0);
 			}
-		} else 0 !== chunk.byteLength && (2048 < chunk.byteLength ? (0 < writtenBytes && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = new Uint8Array(2048), writtenBytes = 0), writeToDestination(destination, chunk)) : (target = currentView.length - writtenBytes, target < chunk.byteLength && (0 === target ? writeToDestination(destination, currentView) : (currentView.set(chunk.subarray(0, target), writtenBytes), writtenBytes += target, writeToDestination(destination, currentView), chunk = chunk.subarray(target)), currentView = new Uint8Array(2048), writtenBytes = 0), currentView.set(chunk, writtenBytes), writtenBytes += chunk.byteLength, 2048 === writtenBytes && (writeToDestination(destination, currentView), currentView = new Uint8Array(2048), writtenBytes = 0)));
+		} else 0 !== chunk.byteLength && (2048 < chunk.byteLength ? (0 < writtenBytes && (writeToDestination(destination, currentView.subarray(0, writtenBytes)), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = 0), writeToDestination(destination, chunk)) : (target = currentView.length - writtenBytes, target < chunk.byteLength && (0 === target ? writeToDestination(destination, currentView) : (currentView.set(chunk.subarray(0, target), writtenBytes), writtenBytes += target, writeToDestination(destination, currentView), chunk = chunk.subarray(target)), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = 0), currentView.set(chunk, writtenBytes), writtenBytes += chunk.byteLength, 2048 === writtenBytes && (writeToDestination(destination, currentView), currentView = /* @__PURE__ */ new Uint8Array(2048), writtenBytes = 0)));
 	}
 	function writeToDestination(destination, view) {
 		destination = destination.write(view);
@@ -9713,7 +10327,7 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 		illegalAttributeNameCache[attributeName] = !0;
 		return !1;
 	}
-	var unitlessNumbers = new Set("animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(" ")), aliases = new Map([
+	var unitlessNumbers = new Set("animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(" ")), aliases = /* @__PURE__ */ new Map([
 		["acceptCharset", "accept-charset"],
 		["htmlFor", "for"],
 		["httpEquiv", "http-equiv"],
@@ -13322,7 +13936,7 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 	}
 	var flushingPartialBoundaries = !1;
 	function flushCompletedQueues(request, destination) {
-		currentView = new Uint8Array(2048);
+		currentView = /* @__PURE__ */ new Uint8Array(2048);
 		writtenBytes = 0;
 		destinationHasCapacity$1 = !0;
 		try {
@@ -13444,7 +14058,7 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 				}
 				completedBoundaries.splice(0, i);
 				completeWriting(destination);
-				currentView = new Uint8Array(2048);
+				currentView = /* @__PURE__ */ new Uint8Array(2048);
 				writtenBytes = 0;
 				flushingPartialBoundaries = destinationHasCapacity$1 = !0;
 				var partialBoundaries = request.partialBoundaries;
@@ -13587,7 +14201,7 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 	}
 	function ensureCorrectIsomorphicReactVersion() {
 		var isomorphicReactPackageVersion = React.version;
-		if ("19.2.5" !== isomorphicReactPackageVersion) throw Error("Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      " + (isomorphicReactPackageVersion + "\n  - react-dom:  19.2.5\nLearn more: https://react.dev/warnings/version-mismatch"));
+		if ("19.2.7" !== isomorphicReactPackageVersion) throw Error("Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      " + (isomorphicReactPackageVersion + "\n  - react-dom:  19.2.7\nLearn more: https://react.dev/warnings/version-mismatch"));
 	}
 	ensureCorrectIsomorphicReactVersion();
 	function createDrainHandler(destination, request) {
@@ -13899,11 +14513,11 @@ var require_react_dom_server_node_production = /* @__PURE__ */ __commonJSMin(((e
 			}
 		};
 	};
-	exports.version = "19.2.5";
+	exports.version = "19.2.7";
 }));
 //#endregion
-//#region node_modules/react-dom/server.node.js
-var require_server_node = /* @__PURE__ */ __commonJSMin(((exports) => {
+//#region node_modules/isbot/index.mjs
+var import_server_node = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports) => {
 	var l = require_react_dom_server_legacy_node_production(), s = require_react_dom_server_node_production();
 	exports.version = l.version;
 	exports.renderToString = l.renderToString;
@@ -13912,333 +14526,8 @@ var require_server_node = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.renderToReadableStream = s.renderToReadableStream;
 	exports.resumeToPipeableStream = s.resumeToPipeableStream;
 	exports.resume = s.resume;
-}));
-//#endregion
-//#region node_modules/@tanstack/router-core/dist/esm/ssr/transformStreamWithRouter.js
-function transformReadableStreamWithRouter(router, routerStream) {
-	return transformStreamWithRouter(router, routerStream);
-}
-function transformPipeableStreamWithRouter(router, routerStream) {
-	return Readable.fromWeb(transformStreamWithRouter(router, Readable.toWeb(routerStream)));
-}
-var BODY_END_TAG = "</body>";
-var HTML_END_TAG = "</html>";
-var MIN_CLOSING_TAG_LENGTH = 4;
-var DEFAULT_SERIALIZATION_TIMEOUT_MS = 6e4;
-var DEFAULT_LIFETIME_TIMEOUT_MS = 6e4;
-var textEncoder = new TextEncoder();
-/**
-* Finds the position just after the last valid HTML closing tag in the string.
-*
-* Valid closing tags match the pattern: </[a-zA-Z][\w:.-]*>
-* Examples: </div>, </my-component>, </slot:name.nested>
-*
-* @returns Position after the last closing tag, or -1 if none found
-*/
-function findLastClosingTagEnd(str) {
-	const len = str.length;
-	if (len < MIN_CLOSING_TAG_LENGTH) return -1;
-	let i = len - 1;
-	while (i >= MIN_CLOSING_TAG_LENGTH - 1) {
-		if (str.charCodeAt(i) === 62) {
-			let j = i - 1;
-			while (j >= 1) {
-				const code = str.charCodeAt(j);
-				if (code >= 97 && code <= 122 || code >= 65 && code <= 90 || code >= 48 && code <= 57 || code === 95 || code === 58 || code === 46 || code === 45) j--;
-				else break;
-			}
-			const tagNameStart = j + 1;
-			if (tagNameStart < i) {
-				const startCode = str.charCodeAt(tagNameStart);
-				if (startCode >= 97 && startCode <= 122 || startCode >= 65 && startCode <= 90) {
-					if (j >= 1 && str.charCodeAt(j) === 47 && str.charCodeAt(j - 1) === 60) return i + 1;
-				}
-			}
-		}
-		i--;
-	}
-	return -1;
-}
-function transformStreamWithRouter(router, appStream, opts) {
-	const serializationAlreadyFinished = router.serverSsr?.isSerializationFinished() ?? false;
-	const initialBufferedHtml = router.serverSsr?.takeBufferedHtml();
-	if (serializationAlreadyFinished && !initialBufferedHtml) {
-		let cleanedUp = false;
-		let controller;
-		let isStreamClosed = false;
-		let lifetimeTimeoutHandle;
-		const cleanup = () => {
-			if (cleanedUp) return;
-			cleanedUp = true;
-			if (lifetimeTimeoutHandle !== void 0) {
-				clearTimeout(lifetimeTimeoutHandle);
-				lifetimeTimeoutHandle = void 0;
-			}
-			router.serverSsr?.cleanup();
-		};
-		const safeClose = () => {
-			if (isStreamClosed) return;
-			isStreamClosed = true;
-			try {
-				controller?.close();
-			} catch {}
-		};
-		const safeError = (error) => {
-			if (isStreamClosed) return;
-			isStreamClosed = true;
-			try {
-				controller?.error(error);
-			} catch {}
-		};
-		const lifetimeMs = opts?.lifetimeMs ?? DEFAULT_LIFETIME_TIMEOUT_MS;
-		lifetimeTimeoutHandle = setTimeout(() => {
-			if (!cleanedUp && !isStreamClosed) {
-				console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
-				safeError(/* @__PURE__ */ new Error("Stream lifetime exceeded"));
-				cleanup();
-			}
-		}, lifetimeMs);
-		const stream = new ReadableStream$1({
-			start(c) {
-				controller = c;
-			},
-			cancel() {
-				isStreamClosed = true;
-				cleanup();
-			}
-		});
-		(async () => {
-			const reader = appStream.getReader();
-			try {
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					if (cleanedUp || isStreamClosed) return;
-					controller?.enqueue(value);
-				}
-				if (cleanedUp || isStreamClosed) return;
-				router.serverSsr?.setRenderFinished();
-				safeClose();
-				cleanup();
-			} catch (error) {
-				if (cleanedUp) return;
-				console.error("Error reading appStream:", error);
-				router.serverSsr?.setRenderFinished();
-				safeError(error);
-				cleanup();
-			} finally {
-				reader.releaseLock();
-			}
-		})().catch((error) => {
-			if (cleanedUp) return;
-			console.error("Error in stream transform:", error);
-			safeError(error);
-			cleanup();
-		});
-		return stream;
-	}
-	let stopListeningToInjectedHtml;
-	let stopListeningToSerializationFinished;
-	let serializationTimeoutHandle;
-	let lifetimeTimeoutHandle;
-	let cleanedUp = false;
-	let controller;
-	let isStreamClosed = false;
-	const textDecoder = new TextDecoder();
-	let pendingRouterHtml = initialBufferedHtml ?? "";
-	let leftover = "";
-	let pendingClosingTags = "";
-	const MAX_LEFTOVER_CHARS = 2048;
-	let isAppRendering = true;
-	let streamBarrierLifted = false;
-	let serializationFinished = serializationAlreadyFinished;
-	function safeEnqueue(chunk) {
-		if (isStreamClosed) return;
-		if (typeof chunk === "string") controller.enqueue(textEncoder.encode(chunk));
-		else controller.enqueue(chunk);
-	}
-	function safeClose() {
-		if (isStreamClosed) return;
-		isStreamClosed = true;
-		try {
-			controller.close();
-		} catch {}
-	}
-	function safeError(error) {
-		if (isStreamClosed) return;
-		isStreamClosed = true;
-		try {
-			controller.error(error);
-		} catch {}
-	}
-	/**
-	* Cleanup with guards; must be idempotent.
-	*/
-	function cleanup() {
-		if (cleanedUp) return;
-		cleanedUp = true;
-		try {
-			stopListeningToInjectedHtml?.();
-			stopListeningToSerializationFinished?.();
-		} catch {}
-		stopListeningToInjectedHtml = void 0;
-		stopListeningToSerializationFinished = void 0;
-		if (serializationTimeoutHandle !== void 0) {
-			clearTimeout(serializationTimeoutHandle);
-			serializationTimeoutHandle = void 0;
-		}
-		if (lifetimeTimeoutHandle !== void 0) {
-			clearTimeout(lifetimeTimeoutHandle);
-			lifetimeTimeoutHandle = void 0;
-		}
-		pendingRouterHtml = "";
-		leftover = "";
-		pendingClosingTags = "";
-		router.serverSsr?.cleanup();
-	}
-	const stream = new ReadableStream$1({
-		start(c) {
-			controller = c;
-		},
-		cancel() {
-			isStreamClosed = true;
-			cleanup();
-		}
-	});
-	function flushPendingRouterHtml() {
-		if (!pendingRouterHtml) return;
-		safeEnqueue(pendingRouterHtml);
-		pendingRouterHtml = "";
-	}
-	function appendRouterHtml(html) {
-		if (!html) return;
-		pendingRouterHtml += html;
-	}
-	/**
-	* Finish only when app done and serialization complete.
-	*/
-	function tryFinish() {
-		if (isAppRendering || !serializationFinished) return;
-		if (cleanedUp || isStreamClosed) return;
-		if (serializationTimeoutHandle !== void 0) {
-			clearTimeout(serializationTimeoutHandle);
-			serializationTimeoutHandle = void 0;
-		}
-		const decoderRemainder = textDecoder.decode();
-		if (leftover) safeEnqueue(leftover);
-		if (decoderRemainder) safeEnqueue(decoderRemainder);
-		flushPendingRouterHtml();
-		if (pendingClosingTags) safeEnqueue(pendingClosingTags);
-		safeClose();
-		cleanup();
-	}
-	const lifetimeMs = opts?.lifetimeMs ?? DEFAULT_LIFETIME_TIMEOUT_MS;
-	lifetimeTimeoutHandle = setTimeout(() => {
-		if (!cleanedUp && !isStreamClosed) {
-			console.warn(`SSR stream transform exceeded maximum lifetime (${lifetimeMs}ms), forcing cleanup`);
-			safeError(/* @__PURE__ */ new Error("Stream lifetime exceeded"));
-			cleanup();
-		}
-	}, lifetimeMs);
-	if (!serializationAlreadyFinished) {
-		stopListeningToInjectedHtml = router.subscribe("onInjectedHtml", () => {
-			if (cleanedUp || isStreamClosed) return;
-			const html = router.serverSsr?.takeBufferedHtml();
-			if (!html) return;
-			if (isAppRendering || leftover || pendingClosingTags) appendRouterHtml(html);
-			else {
-				flushPendingRouterHtml();
-				safeEnqueue(html);
-			}
-		});
-		stopListeningToSerializationFinished = router.subscribe("onSerializationFinished", () => {
-			serializationFinished = true;
-			tryFinish();
-		});
-	}
-	(async () => {
-		const reader = appStream.getReader();
-		try {
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				if (cleanedUp || isStreamClosed) return;
-				const text = value instanceof Uint8Array ? textDecoder.decode(value, { stream: true }) : String(value);
-				const chunkString = leftover ? leftover + text : text;
-				if (!streamBarrierLifted) {
-					if (chunkString.includes("$tsr-stream-barrier")) {
-						streamBarrierLifted = true;
-						router.serverSsr?.liftScriptBarrier();
-					}
-				}
-				if (pendingClosingTags) {
-					pendingClosingTags += chunkString;
-					leftover = "";
-					continue;
-				}
-				const bodyEndIndex = chunkString.indexOf(BODY_END_TAG);
-				const htmlEndIndex = chunkString.indexOf(HTML_END_TAG);
-				if (bodyEndIndex !== -1 && htmlEndIndex !== -1 && bodyEndIndex < htmlEndIndex) {
-					pendingClosingTags = chunkString.slice(bodyEndIndex);
-					safeEnqueue(chunkString.slice(0, bodyEndIndex));
-					flushPendingRouterHtml();
-					leftover = "";
-					continue;
-				}
-				const lastClosingTagEnd = findLastClosingTagEnd(chunkString);
-				if (lastClosingTagEnd > 0) {
-					safeEnqueue(chunkString.slice(0, lastClosingTagEnd));
-					flushPendingRouterHtml();
-					leftover = chunkString.slice(lastClosingTagEnd);
-					if (leftover.length > MAX_LEFTOVER_CHARS) {
-						safeEnqueue(leftover.slice(0, leftover.length - MAX_LEFTOVER_CHARS));
-						leftover = leftover.slice(-2048);
-					}
-				} else {
-					const combined = chunkString;
-					if (combined.length > MAX_LEFTOVER_CHARS) {
-						const flushUpto = combined.length - MAX_LEFTOVER_CHARS;
-						safeEnqueue(combined.slice(0, flushUpto));
-						leftover = combined.slice(flushUpto);
-					} else leftover = combined;
-				}
-			}
-			if (cleanedUp || isStreamClosed) return;
-			isAppRendering = false;
-			router.serverSsr?.setRenderFinished();
-			if (serializationFinished) tryFinish();
-			else {
-				const timeoutMs = opts?.timeoutMs ?? DEFAULT_SERIALIZATION_TIMEOUT_MS;
-				serializationTimeoutHandle = setTimeout(() => {
-					if (!cleanedUp && !isStreamClosed) {
-						console.error("Serialization timeout after app render finished");
-						safeError(/* @__PURE__ */ new Error("Serialization timeout after app render finished"));
-						cleanup();
-					}
-				}, timeoutMs);
-			}
-		} catch (error) {
-			if (cleanedUp) return;
-			console.error("Error reading appStream:", error);
-			isAppRendering = false;
-			router.serverSsr?.setRenderFinished();
-			safeError(error);
-			cleanup();
-		} finally {
-			reader.releaseLock();
-		}
-	})().catch((error) => {
-		if (cleanedUp) return;
-		console.error("Error in stream transform:", error);
-		safeError(error);
-		cleanup();
-	});
-	return stream;
-}
-//#endregion
-//#region node_modules/isbot/index.mjs
-var import_server_node = /* @__PURE__ */ __toESM(require_server_node(), 1);
-var fullPattern = " daum[ /]| deusu/|(?:^|[^g])news(?!sapphire)|(?<! (?:channel/|google/))google(?!(app|/google| pixel))|(?<! cu)bots?(?:\\b|_)|(?<!(?:lib))http|(?<!cam)scan|24x7|@[a-z][\\w-]+\\.|\\(\\)|\\.com\\b|\\b\\w+\\.ai|\\bcursor/|\\bmanus-user/|\\bort/|\\bperl\\b|\\bplaywright\\b|\\bsecurityheaders\\b|\\bselenium\\b|\\btime/|\\||^[\\w \\.\\-\\(?:\\):%]+(?:/v?\\d+(?:\\.\\d+)?(?:\\.\\d{1,10})*?)?(?:,|$)|^[\\w\\-]+/[\\w]+$|^[^ ]{50,}$|^\\d+\\b|^\\W|^\\w*search\\b|^\\w+/[\\w\\(\\)]*$|^\\w+/\\d\\.\\d\\s\\([\\w@]+\\)$|^active|^ad muncher|^amaya|^apache/|^avsdevicesdk/|^azure|^biglotron|^bot|^bw/|^clamav[ /]|^claude-code/|^client/|^cobweb/|^custom|^ddg[_-]android|^discourse|^dispatch/\\d|^downcast/|^duckduckgo|^email|^facebook|^getright/|^gozilla/|^hobbit|^hotzonu|^hwcdn/|^igetter/|^jeode/|^jetty/|^jigsaw|^microsoft bits|^movabletype|^mozilla/\\d\\.\\d\\s[\\w\\.-]+$|^mozilla/\\d\\.\\d\\s\\((?:compatible;)?(?:\\s?[\\w\\d-.]+\\/\\d+\\.\\d+)?\\)$|^navermailapp|^netsurf|^offline|^openai/|^owler|^php|^postman|^python|^rank|^read|^reed|^rest|^rss|^snapchat|^space bison|^svn|^swcd |^taringa|^thumbor/|^track|^w3c|^webbandit/|^webcopier|^wget|^whatsapp|^wordpress|^xenu link sleuth|^yahoo|^yandex|^zdm/\\d|^zoom marketplace/|advisor|agent\\b|analyzer|archive|ask jeeves/teoma|audit|bit\\.ly/|bluecoat drtr|browsex|burpcollaborator|capture|catch|check\\b|checker|chrome-lighthouse|chromeframe|classifier|cloudflare|convertify|crawl|cypress/|dareboost|datanyze|dejaclick|detect|dmbrowser|download|exaleadcloudview|feed|fetcher|firephp|functionize|grab|headless|httrack|hubspot marketing grader|ibisbrowser|infrawatch|insight|inspect|iplabel|java(?!;)|library|linkcheck|mail\\.ru/|manager|measure|monitor\\b|neustar wpm|node\\b|nutch|offbyone|onetrust|optimize|pageburst|pagespeed|parser|phantomjs|pingdom|powermarks|preview|proxy|ptst[ /]\\d|retriever|rexx;|rigor|rss\\b|scrape|server|sogou|sparkler/|speedcurve|spider|splash|statuscake|supercleaner|synapse|synthetic|tools|torrent|transcoder|url|validator|virtuoso|wappalyzer|webglance|webkit2png|whatcms/|xtate/";
+})))(), 1);
+var fullPattern = " daum[ /]| deusu/|(?:^|[^g])news(?!sapphire)|(?<! (?:channel/|google/))google(?!(wv|app|/google| pixel))|(?<! cu)bots?(?:\\b|_)|(?<!(?:lib))http|(?<!cam)scan|24x7|;\\s\\w+;$|@[a-z][\\w-]+\\.|\\(\\)|\\.com\\b|\\b\\w+\\.ai|\\bbw/|\\bdlc\\b|\\bort/|\\bperl\\b|\\btime/|\\||^[\\w \\.\\-\\(?:\\):%]+(?:/v?\\d+(?:\\.\\d+)?(?:\\.\\d{1,10})*?)?(?:,|$)|^[\\w\\-]+/[\\w]+$|^[^ ]{50,}$|^\\d+\\b|^\\W|^\\w*search\\b|^\\w+/[\\w\\(\\)]*$|^\\w+/\\d\\.\\d\\s\\([\\w@]+\\)$|^active|^ad muncher|^amaya|^apache/|^avsdevicesdk/|^azure|^biglotron|^blackbox exporter|^bot|^clamav[ /]|^claude-code/|^client/|^cobweb/|^custom|^ddg[_-]android|^discourse|^dispatch/\\d|^downcast/|^duckduckgo|^email|^exodusmovement|^facebook|^getright/|^gozilla/|^hobbit|^hotzonu|^hwcdn/|^igetter/|^jeode/|^jetty/|^jigsaw|^microsoft bits|^movabletype|^mozilla/\\d\\.\\d\\s[\\w\\.-]+$|^mozilla/\\d\\.\\d\\s\\((?:compatible;)?(?:\\s?[\\w\\d-.]+\\/\\d+\\.\\d+)?\\)$|^navermailapp|^netsurf|^offline|^openai/|^owler|^php|^postman|^ps_daily/|^python|^rank|^read|^reed|^remove\\.bg/|^rest|^rss|^snapchat|^sora |^space bison|^stape/|^svn|^swcd |^taringa|^thumbor/|^track|^w3c|^webbandit/|^webcopier|^wget|^whatsapp|^wordpress|^xenu link sleuth|^yahoo|^yandex|^zdm/\\d|^zoom marketplace/|abuse|advisor|agent\\b|analyzer|archive|ask jeeves/teoma|attracta|audit|bluecoat drtr|browsex|burpcollaborator|capture|catch|check\\b|checker|chrome-lighthouse|chromeframe|classifier|cloudflare|collapsify\\b|convertify|cookiehubverify/|crawl|cursor/|cypress/|dareboost|datanyze|dejaclick|detect|dmbrowser|download|exaleadcloudview|feed|fetcher|firephp|foregenix|functionize|grab|productfinder|hardenize\\b|headless|hotjar|httrack|hubspot marketing grader|ibisbrowser|infrawatch|insight|inspect|iplabel|java(?!;)|library|linkcheck|linktiger|mail\\.ru/|manager|manus-user/|marketgoo/|measure|monitor\\b|neustar wpm|node\\b|nutch|offbyone|openvas|optimize|pageburst|pagespeed|parser|phantomjs|pingdom|playwright|powermarks|preview|proxy|ptst[ /]\\d|readable/|retriever|rexx;|rigor|rss\\b|scrape|securityheaders|selenium|server|silktide|sindup/|sogou|sparkler/|speedcurve|spider|splash|statuscake|supercleaner|synapse|synthetic|testlocally|tools|torrent|transcoder|upday/|url|validator|virtuoso|wappalyzer|watchtowr|webglance|webkit2png|whatcms/|xtate/";
 var naivePattern = /bot|crawl|http|lighthouse|scan|search|spider/i;
 var pattern;
 function getPattern() {
@@ -14256,24 +14545,73 @@ function isbot(userAgent) {
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/ssr/renderRouterToStream.js
+var noop = () => {};
+async function waitForReadyOrAbort(ready, signal) {
+	let cleanup = noop;
+	try {
+		await Promise.race([ready, new Promise((resolve) => {
+			const onAbort = () => resolve();
+			cleanup = () => signal.removeEventListener("abort", onAbort);
+			signal.addEventListener("abort", onAbort, { once: true });
+			if (signal.aborted) resolve();
+		})]);
+	} finally {
+		cleanup();
+	}
+}
+var isAbortError = (request, error) => request.signal.aborted && error === request.signal.reason || error instanceof Error && error.name === "AbortError";
 var renderRouterToStream = async ({ request, router, responseHeaders, children }) => {
 	if (typeof import_server_node.renderToReadableStream === "function") {
 		const stream = await import_server_node.renderToReadableStream(children, {
 			signal: request.signal,
 			nonce: router.options.ssr?.nonce,
-			progressiveChunkSize: Number.POSITIVE_INFINITY
+			progressiveChunkSize: Number.POSITIVE_INFINITY,
+			onError: (error, info) => {
+				if (!isAbortError(request, error)) console.error("Error in renderToReadableStream:", error, info);
+			}
 		});
-		if (isbot(request.headers.get("User-Agent"))) await stream.allReady;
-		const responseStream = transformReadableStreamWithRouter(router, stream);
-		return new Response(responseStream, {
+		if (isbot(request.headers.get("User-Agent"))) await waitForReadyOrAbort(stream.allReady, request.signal);
+		const responseStream = transformReadableStreamWithRouter(router, stream, { onAbort: () => stream.cancel().catch(() => {}) });
+		return createSsrStreamResponse(router, new Response(responseStream, {
 			status: router.stores.statusCode.get(),
 			headers: responseHeaders
-		});
+		}));
 	}
 	if (typeof import_server_node.renderToPipeableStream === "function") {
 		const reactAppPassthrough = new PassThrough();
+		let pipeable;
+		let responseAttached = false;
+		let aborted = false;
+		let endedBeforeAttach = false;
+		let pendingAbortReason;
+		const toError = (reason) => reason instanceof Error ? reason : new Error(String(reason ?? "SSR aborted"));
+		const destroyError = (reason) => reason === void 0 ? void 0 : toError(reason);
+		const pendingDestroyError = () => pendingAbortReason === void 0 ? toError(pendingAbortReason) : destroyError(pendingAbortReason);
+		const finishPassThrough = (reason, opts) => {
+			if (reactAppPassthrough.destroyed) return;
+			if (responseAttached) reactAppPassthrough.destroy(opts?.defaultError ? toError(reason) : destroyError(reason));
+			else endedBeforeAttach = true;
+		};
+		const abortPipeable = (reason, opts) => {
+			if (aborted) return;
+			aborted = true;
+			pendingAbortReason = reason;
+			const err = toError(reason);
+			try {
+				pipeable?.abort(err);
+			} catch {}
+			finishPassThrough(reason, opts);
+		};
+		if (request.signal.aborted) abortPipeable(request.signal.reason);
+		else {
+			const onRequestAbort = () => abortPipeable(request.signal.reason);
+			request.signal.addEventListener("abort", onRequestAbort, { once: true });
+			router.serverSsr?.onCleanup(() => {
+				request.signal.removeEventListener("abort", onRequestAbort);
+			});
+		}
 		try {
-			const pipeable = import_server_node.renderToPipeableStream(children, {
+			pipeable = import_server_node.renderToPipeableStream(children, {
 				nonce: router.options.ssr?.nonce,
 				progressiveChunkSize: Number.POSITIVE_INFINITY,
 				...isbot(request.headers.get("User-Agent")) ? { onAllReady() {
@@ -14282,21 +14620,27 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 					pipeable.pipe(reactAppPassthrough);
 				} },
 				onError: (error, info) => {
-					console.error("Error in renderToPipeableStream:", error, info);
-					if (!reactAppPassthrough.destroyed) reactAppPassthrough.destroy(error instanceof Error ? error : new Error(String(error)));
+					if (!isAbortError(request, error)) console.error("Error in renderToPipeableStream:", error, info);
+					abortPipeable(error, { defaultError: true });
 				}
 			});
 		} catch (e) {
 			console.error("Error in renderToPipeableStream:", e);
-			reactAppPassthrough.destroy(e instanceof Error ? e : new Error(String(e)));
+			router.serverSsr?.cleanup();
+			throw e;
 		}
-		const responseStream = transformPipeableStreamWithRouter(router, reactAppPassthrough);
-		return new Response(responseStream, {
+		const responseStream = transformPipeableStreamWithRouter(router, reactAppPassthrough, { onAbort: abortPipeable });
+		responseAttached = true;
+		if (endedBeforeAttach) reactAppPassthrough.destroy(pendingDestroyError());
+		if (aborted && pipeable) try {
+			pipeable.abort(toError(pendingAbortReason));
+		} catch {}
+		return createSsrStreamResponse(router, new Response(responseStream, {
 			status: router.stores.statusCode.get(),
 			headers: responseHeaders
-		});
+		}));
 	}
 	throw new Error("No renderToReadableStream or renderToPipeableStream found in react-dom/server. Ensure you are using a version of react-dom that supports streaming.");
 };
 //#endregion
-export { isNotFound as C, decodePath as E, rootRouteId as S, invariant as T, isInlinableStylesheet as _, createRouter as a, isRedirect as b, createFileRoute as c, useRouter as d, GLOBAL_TSR as f, getStylesheetHref as g, createInlineCssStyleAsset as h, RouterProvider as i, createRootRouteWithContext as l, createInlineCssPlaceholderAsset as m, Scripts as n, Outlet as o, TSR_SCRIPT_BARRIER_ID as p, HeadContent as r, lazyRouteComponent as s, renderRouterToStream as t, Link as u, resolveManifestAssetLink as v, createLRUCache as w, isResolvedRedirect as x, executeRewriteInput as y };
+export { isNotFound as A, resolveManifestAssetLink as C, isResolvedRedirect as D, isRedirect as E, invariant as M, decodePath as N, parseRedirect as O, getStylesheetHref as S, executeRewriteInput as T, GLOBAL_TSR as _, replaceSsrResponse as a, createInlineCssStyleAsset as b, HeadContent as c, Outlet as d, lazyRouteComponent as f, useRouter as g, Link as h, normalizeSsrResponse as i, createLRUCache as j, rootRouteId as k, RouterProvider as l, createRootRouteWithContext as m, defineHandlerCallback as n, stripSsrResponseBody as o, createFileRoute as p, isSsrResponse as r, Scripts as s, renderRouterToStream as t, createRouter as u, TSR_SCRIPT_BARRIER_ID as v, resolveManifestCssLink as w, getScriptPreloadAttrs as x, createInlineCssPlaceholderAsset as y };

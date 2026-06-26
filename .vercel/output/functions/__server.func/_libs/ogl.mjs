@@ -1,3 +1,218 @@
+//#region node_modules/ogl/src/core/Program.js
+var ID$3 = 1;
+var arrayCacheF32 = {};
+var Program = class {
+	constructor(gl, { vertex, fragment, uniforms = {}, transparent = false, cullFace = gl.BACK, frontFace = gl.CCW, depthTest = true, depthWrite = true, depthFunc = gl.LEQUAL } = {}) {
+		if (!gl.canvas) console.error("gl not passed as first argument to Program");
+		this.gl = gl;
+		this.uniforms = uniforms;
+		this.id = ID$3++;
+		if (!vertex) console.warn("vertex shader not supplied");
+		if (!fragment) console.warn("fragment shader not supplied");
+		this.transparent = transparent;
+		this.cullFace = cullFace;
+		this.frontFace = frontFace;
+		this.depthTest = depthTest;
+		this.depthWrite = depthWrite;
+		this.depthFunc = depthFunc;
+		this.blendFunc = {};
+		this.blendEquation = {};
+		this.stencilFunc = {};
+		this.stencilOp = {};
+		if (this.transparent && !this.blendFunc.src) if (this.gl.renderer.premultipliedAlpha) this.setBlendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
+		else this.setBlendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		this.program = gl.createProgram();
+		gl.attachShader(this.program, this.vertexShader);
+		gl.attachShader(this.program, this.fragmentShader);
+		this.setShaders({
+			vertex,
+			fragment
+		});
+	}
+	setShaders({ vertex, fragment }) {
+		if (vertex) {
+			this.gl.shaderSource(this.vertexShader, vertex);
+			this.gl.compileShader(this.vertexShader);
+			if (this.gl.getShaderInfoLog(this.vertexShader) !== "") console.warn(`${this.gl.getShaderInfoLog(this.vertexShader)}\nVertex Shader\n${addLineNumbers(vertex)}`);
+		}
+		if (fragment) {
+			this.gl.shaderSource(this.fragmentShader, fragment);
+			this.gl.compileShader(this.fragmentShader);
+			if (this.gl.getShaderInfoLog(this.fragmentShader) !== "") console.warn(`${this.gl.getShaderInfoLog(this.fragmentShader)}\nFragment Shader\n${addLineNumbers(fragment)}`);
+		}
+		this.gl.linkProgram(this.program);
+		if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) return console.warn(this.gl.getProgramInfoLog(this.program));
+		this.uniformLocations = /* @__PURE__ */ new Map();
+		let numUniforms = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORMS);
+		for (let uIndex = 0; uIndex < numUniforms; uIndex++) {
+			let uniform = this.gl.getActiveUniform(this.program, uIndex);
+			this.uniformLocations.set(uniform, this.gl.getUniformLocation(this.program, uniform.name));
+			const split = uniform.name.match(/(\w+)/g);
+			uniform.uniformName = split[0];
+			uniform.nameComponents = split.slice(1);
+		}
+		this.attributeLocations = /* @__PURE__ */ new Map();
+		const locations = [];
+		const numAttribs = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_ATTRIBUTES);
+		for (let aIndex = 0; aIndex < numAttribs; aIndex++) {
+			const attribute = this.gl.getActiveAttrib(this.program, aIndex);
+			const location = this.gl.getAttribLocation(this.program, attribute.name);
+			if (location === -1) continue;
+			locations[location] = attribute.name;
+			this.attributeLocations.set(attribute, location);
+		}
+		this.attributeOrder = locations.join("");
+	}
+	setBlendFunc(src, dst, srcAlpha, dstAlpha) {
+		this.blendFunc.src = src;
+		this.blendFunc.dst = dst;
+		this.blendFunc.srcAlpha = srcAlpha;
+		this.blendFunc.dstAlpha = dstAlpha;
+		if (src) this.transparent = true;
+	}
+	setBlendEquation(modeRGB, modeAlpha) {
+		this.blendEquation.modeRGB = modeRGB;
+		this.blendEquation.modeAlpha = modeAlpha;
+	}
+	setStencilFunc(func, ref, mask) {
+		this.stencilRef = ref;
+		this.stencilFunc.func = func;
+		this.stencilFunc.ref = ref;
+		this.stencilFunc.mask = mask;
+	}
+	setStencilOp(stencilFail, depthFail, depthPass) {
+		this.stencilOp.stencilFail = stencilFail;
+		this.stencilOp.depthFail = depthFail;
+		this.stencilOp.depthPass = depthPass;
+	}
+	applyState() {
+		if (this.depthTest) this.gl.renderer.enable(this.gl.DEPTH_TEST);
+		else this.gl.renderer.disable(this.gl.DEPTH_TEST);
+		if (this.cullFace) this.gl.renderer.enable(this.gl.CULL_FACE);
+		else this.gl.renderer.disable(this.gl.CULL_FACE);
+		if (this.blendFunc.src) this.gl.renderer.enable(this.gl.BLEND);
+		else this.gl.renderer.disable(this.gl.BLEND);
+		if (this.cullFace) this.gl.renderer.setCullFace(this.cullFace);
+		this.gl.renderer.setFrontFace(this.frontFace);
+		this.gl.renderer.setDepthMask(this.depthWrite);
+		this.gl.renderer.setDepthFunc(this.depthFunc);
+		if (this.blendFunc.src) this.gl.renderer.setBlendFunc(this.blendFunc.src, this.blendFunc.dst, this.blendFunc.srcAlpha, this.blendFunc.dstAlpha);
+		this.gl.renderer.setBlendEquation(this.blendEquation.modeRGB, this.blendEquation.modeAlpha);
+		if (this.stencilFunc.func || this.stencilOp.stencilFail) this.gl.renderer.enable(this.gl.STENCIL_TEST);
+		else this.gl.renderer.disable(this.gl.STENCIL_TEST);
+		this.gl.renderer.setStencilFunc(this.stencilFunc.func, this.stencilFunc.ref, this.stencilFunc.mask);
+		this.gl.renderer.setStencilOp(this.stencilOp.stencilFail, this.stencilOp.depthFail, this.stencilOp.depthPass);
+	}
+	use({ flipFaces = false } = {}) {
+		let textureUnit = -1;
+		if (!(this.gl.renderer.state.currentProgram === this.id)) {
+			this.gl.useProgram(this.program);
+			this.gl.renderer.state.currentProgram = this.id;
+		}
+		this.uniformLocations.forEach((location, activeUniform) => {
+			let uniform = this.uniforms[activeUniform.uniformName];
+			for (const component of activeUniform.nameComponents) {
+				if (!uniform) break;
+				if (component in uniform) uniform = uniform[component];
+				else if (Array.isArray(uniform.value)) break;
+				else {
+					uniform = void 0;
+					break;
+				}
+			}
+			if (!uniform) return warn(`Active uniform ${activeUniform.name} has not been supplied`);
+			if (uniform && uniform.value === void 0) return warn(`${activeUniform.name} uniform is missing a value parameter`);
+			if (uniform.value.texture) {
+				textureUnit = textureUnit + 1;
+				uniform.value.update(textureUnit);
+				return setUniform(this.gl, activeUniform.type, location, textureUnit);
+			}
+			if (uniform.value.length && uniform.value[0].texture) {
+				const textureUnits = [];
+				uniform.value.forEach((value) => {
+					textureUnit = textureUnit + 1;
+					value.update(textureUnit);
+					textureUnits.push(textureUnit);
+				});
+				return setUniform(this.gl, activeUniform.type, location, textureUnits);
+			}
+			setUniform(this.gl, activeUniform.type, location, uniform.value);
+		});
+		this.applyState();
+		if (flipFaces) this.gl.renderer.setFrontFace(this.frontFace === this.gl.CCW ? this.gl.CW : this.gl.CCW);
+	}
+	remove() {
+		this.gl.deleteProgram(this.program);
+	}
+};
+function setUniform(gl, type, location, value) {
+	value = value.length ? flatten(value) : value;
+	const setValue = gl.renderer.state.uniformLocations.get(location);
+	if (value.length) if (setValue === void 0 || setValue.length !== value.length) gl.renderer.state.uniformLocations.set(location, value.slice(0));
+	else {
+		if (arraysEqual(setValue, value)) return;
+		setValue.set ? setValue.set(value) : setArray(setValue, value);
+		gl.renderer.state.uniformLocations.set(location, setValue);
+	}
+	else {
+		if (setValue === value) return;
+		gl.renderer.state.uniformLocations.set(location, value);
+	}
+	switch (type) {
+		case 5126: return value.length ? gl.uniform1fv(location, value) : gl.uniform1f(location, value);
+		case 35664: return gl.uniform2fv(location, value);
+		case 35665: return gl.uniform3fv(location, value);
+		case 35666: return gl.uniform4fv(location, value);
+		case 35670:
+		case 5124:
+		case 35678:
+		case 36306:
+		case 35680:
+		case 36289: return value.length ? gl.uniform1iv(location, value) : gl.uniform1i(location, value);
+		case 35671:
+		case 35667: return gl.uniform2iv(location, value);
+		case 35672:
+		case 35668: return gl.uniform3iv(location, value);
+		case 35673:
+		case 35669: return gl.uniform4iv(location, value);
+		case 35674: return gl.uniformMatrix2fv(location, false, value);
+		case 35675: return gl.uniformMatrix3fv(location, false, value);
+		case 35676: return gl.uniformMatrix4fv(location, false, value);
+	}
+}
+function addLineNumbers(string) {
+	let lines = string.split("\n");
+	for (let i = 0; i < lines.length; i++) lines[i] = i + 1 + ": " + lines[i];
+	return lines.join("\n");
+}
+function flatten(a) {
+	const arrayLen = a.length;
+	const valueLen = a[0].length;
+	if (valueLen === void 0) return a;
+	const length = arrayLen * valueLen;
+	let value = arrayCacheF32[length];
+	if (!value) arrayCacheF32[length] = value = new Float32Array(length);
+	for (let i = 0; i < arrayLen; i++) value.set(a[i], i * valueLen);
+	return value;
+}
+function arraysEqual(a, b) {
+	if (a.length !== b.length) return false;
+	for (let i = 0, l = a.length; i < l; i++) if (a[i] !== b[i]) return false;
+	return true;
+}
+function setArray(a, b) {
+	for (let i = 0, l = a.length; i < l; i++) a[i] = b[i];
+}
+var warnCount = 0;
+function warn(message) {
+	if (warnCount > 100) return;
+	console.warn(message);
+	warnCount++;
+	if (warnCount > 100) console.warn("More than 100 program warnings - stopping logs.");
+}
+//#endregion
 //#region node_modules/ogl/src/math/functions/Vec3Func.js
 /**
 * Calculates the length of a vec3
@@ -516,399 +731,9 @@ var Vec3 = class Vec3 extends Array {
 	}
 };
 //#endregion
-//#region node_modules/ogl/src/core/Geometry.js
-var tempVec3$1 = /* @__PURE__ */ new Vec3();
-var ID$3 = 1;
-var ATTR_ID = 1;
-var isBoundsWarned = false;
-var Geometry = class {
-	constructor(gl, attributes = {}) {
-		if (!gl.canvas) console.error("gl not passed as first argument to Geometry");
-		this.gl = gl;
-		this.attributes = attributes;
-		this.id = ID$3++;
-		this.VAOs = {};
-		this.drawRange = {
-			start: 0,
-			count: 0
-		};
-		this.instancedCount = 0;
-		this.gl.renderer.bindVertexArray(null);
-		this.gl.renderer.currentGeometry = null;
-		this.glState = this.gl.renderer.state;
-		for (let key in attributes) this.addAttribute(key, attributes[key]);
-	}
-	addAttribute(key, attr) {
-		this.attributes[key] = attr;
-		attr.id = ATTR_ID++;
-		attr.size = attr.size || 1;
-		attr.type = attr.type || (attr.data.constructor === Float32Array ? this.gl.FLOAT : attr.data.constructor === Uint16Array ? this.gl.UNSIGNED_SHORT : this.gl.UNSIGNED_INT);
-		attr.target = key === "index" ? this.gl.ELEMENT_ARRAY_BUFFER : this.gl.ARRAY_BUFFER;
-		attr.normalized = attr.normalized || false;
-		attr.stride = attr.stride || 0;
-		attr.offset = attr.offset || 0;
-		attr.count = attr.count || (attr.stride ? attr.data.byteLength / attr.stride : attr.data.length / attr.size);
-		attr.divisor = attr.instanced || 0;
-		attr.needsUpdate = false;
-		attr.usage = attr.usage || this.gl.STATIC_DRAW;
-		if (!attr.buffer) this.updateAttribute(attr);
-		if (attr.divisor) {
-			this.isInstanced = true;
-			if (this.instancedCount && this.instancedCount !== attr.count * attr.divisor) {
-				console.warn("geometry has multiple instanced buffers of different length");
-				return this.instancedCount = Math.min(this.instancedCount, attr.count * attr.divisor);
-			}
-			this.instancedCount = attr.count * attr.divisor;
-		} else if (key === "index") this.drawRange.count = attr.count;
-		else if (!this.attributes.index) this.drawRange.count = Math.max(this.drawRange.count, attr.count);
-	}
-	updateAttribute(attr) {
-		const isNewBuffer = !attr.buffer;
-		if (isNewBuffer) attr.buffer = this.gl.createBuffer();
-		if (this.glState.boundBuffer !== attr.buffer) {
-			this.gl.bindBuffer(attr.target, attr.buffer);
-			this.glState.boundBuffer = attr.buffer;
-		}
-		if (isNewBuffer) this.gl.bufferData(attr.target, attr.data, attr.usage);
-		else this.gl.bufferSubData(attr.target, 0, attr.data);
-		attr.needsUpdate = false;
-	}
-	setIndex(value) {
-		this.addAttribute("index", value);
-	}
-	setDrawRange(start, count) {
-		this.drawRange.start = start;
-		this.drawRange.count = count;
-	}
-	setInstancedCount(value) {
-		this.instancedCount = value;
-	}
-	createVAO(program) {
-		this.VAOs[program.attributeOrder] = this.gl.renderer.createVertexArray();
-		this.gl.renderer.bindVertexArray(this.VAOs[program.attributeOrder]);
-		this.bindAttributes(program);
-	}
-	bindAttributes(program) {
-		program.attributeLocations.forEach((location, { name, type }) => {
-			if (!this.attributes[name]) {
-				console.warn(`active attribute ${name} not being supplied`);
-				return;
-			}
-			const attr = this.attributes[name];
-			this.gl.bindBuffer(attr.target, attr.buffer);
-			this.glState.boundBuffer = attr.buffer;
-			let numLoc = 1;
-			if (type === 35674) numLoc = 2;
-			if (type === 35675) numLoc = 3;
-			if (type === 35676) numLoc = 4;
-			const size = attr.size / numLoc;
-			const stride = numLoc === 1 ? 0 : numLoc * numLoc * 4;
-			const offset = numLoc === 1 ? 0 : numLoc * 4;
-			for (let i = 0; i < numLoc; i++) {
-				this.gl.vertexAttribPointer(location + i, size, attr.type, attr.normalized, attr.stride + stride, attr.offset + i * offset);
-				this.gl.enableVertexAttribArray(location + i);
-				this.gl.renderer.vertexAttribDivisor(location + i, attr.divisor);
-			}
-		});
-		if (this.attributes.index) this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.attributes.index.buffer);
-	}
-	draw({ program, mode = this.gl.TRIANGLES }) {
-		if (this.gl.renderer.currentGeometry !== `${this.id}_${program.attributeOrder}`) {
-			if (!this.VAOs[program.attributeOrder]) this.createVAO(program);
-			this.gl.renderer.bindVertexArray(this.VAOs[program.attributeOrder]);
-			this.gl.renderer.currentGeometry = `${this.id}_${program.attributeOrder}`;
-		}
-		program.attributeLocations.forEach((location, { name }) => {
-			const attr = this.attributes[name];
-			if (attr.needsUpdate) this.updateAttribute(attr);
-		});
-		let indexBytesPerElement = 2;
-		if (this.attributes.index?.type === this.gl.UNSIGNED_INT) indexBytesPerElement = 4;
-		if (this.isInstanced) if (this.attributes.index) this.gl.renderer.drawElementsInstanced(mode, this.drawRange.count, this.attributes.index.type, this.attributes.index.offset + this.drawRange.start * indexBytesPerElement, this.instancedCount);
-		else this.gl.renderer.drawArraysInstanced(mode, this.drawRange.start, this.drawRange.count, this.instancedCount);
-		else if (this.attributes.index) this.gl.drawElements(mode, this.drawRange.count, this.attributes.index.type, this.attributes.index.offset + this.drawRange.start * indexBytesPerElement);
-		else this.gl.drawArrays(mode, this.drawRange.start, this.drawRange.count);
-	}
-	getPosition() {
-		const attr = this.attributes.position;
-		if (attr.data) return attr;
-		if (isBoundsWarned) return;
-		console.warn("No position buffer data found to compute bounds");
-		return isBoundsWarned = true;
-	}
-	computeBoundingBox(attr) {
-		if (!attr) attr = this.getPosition();
-		const array = attr.data;
-		const stride = attr.size;
-		if (!this.bounds) this.bounds = {
-			min: new Vec3(),
-			max: new Vec3(),
-			center: new Vec3(),
-			scale: new Vec3(),
-			radius: Infinity
-		};
-		const min = this.bounds.min;
-		const max = this.bounds.max;
-		const center = this.bounds.center;
-		const scale = this.bounds.scale;
-		min.set(Infinity);
-		max.set(-Infinity);
-		for (let i = 0, l = array.length; i < l; i += stride) {
-			const x = array[i];
-			const y = array[i + 1];
-			const z = array[i + 2];
-			min.x = Math.min(x, min.x);
-			min.y = Math.min(y, min.y);
-			min.z = Math.min(z, min.z);
-			max.x = Math.max(x, max.x);
-			max.y = Math.max(y, max.y);
-			max.z = Math.max(z, max.z);
-		}
-		scale.sub(max, min);
-		center.add(min, max).divide(2);
-	}
-	computeBoundingSphere(attr) {
-		if (!attr) attr = this.getPosition();
-		const array = attr.data;
-		const stride = attr.size;
-		if (!this.bounds) this.computeBoundingBox(attr);
-		let maxRadiusSq = 0;
-		for (let i = 0, l = array.length; i < l; i += stride) {
-			tempVec3$1.fromArray(array, i);
-			maxRadiusSq = Math.max(maxRadiusSq, this.bounds.center.squaredDistance(tempVec3$1));
-		}
-		this.bounds.radius = Math.sqrt(maxRadiusSq);
-	}
-	remove() {
-		for (let key in this.VAOs) {
-			this.gl.renderer.deleteVertexArray(this.VAOs[key]);
-			delete this.VAOs[key];
-		}
-		for (let key in this.attributes) {
-			this.gl.deleteBuffer(this.attributes[key].buffer);
-			delete this.attributes[key];
-		}
-	}
-};
-//#endregion
-//#region node_modules/ogl/src/core/Program.js
-var ID$2 = 1;
-var arrayCacheF32 = {};
-var Program = class {
-	constructor(gl, { vertex, fragment, uniforms = {}, transparent = false, cullFace = gl.BACK, frontFace = gl.CCW, depthTest = true, depthWrite = true, depthFunc = gl.LEQUAL } = {}) {
-		if (!gl.canvas) console.error("gl not passed as first argument to Program");
-		this.gl = gl;
-		this.uniforms = uniforms;
-		this.id = ID$2++;
-		if (!vertex) console.warn("vertex shader not supplied");
-		if (!fragment) console.warn("fragment shader not supplied");
-		this.transparent = transparent;
-		this.cullFace = cullFace;
-		this.frontFace = frontFace;
-		this.depthTest = depthTest;
-		this.depthWrite = depthWrite;
-		this.depthFunc = depthFunc;
-		this.blendFunc = {};
-		this.blendEquation = {};
-		this.stencilFunc = {};
-		this.stencilOp = {};
-		if (this.transparent && !this.blendFunc.src) if (this.gl.renderer.premultipliedAlpha) this.setBlendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
-		else this.setBlendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
-		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-		this.program = gl.createProgram();
-		gl.attachShader(this.program, this.vertexShader);
-		gl.attachShader(this.program, this.fragmentShader);
-		this.setShaders({
-			vertex,
-			fragment
-		});
-	}
-	setShaders({ vertex, fragment }) {
-		if (vertex) {
-			this.gl.shaderSource(this.vertexShader, vertex);
-			this.gl.compileShader(this.vertexShader);
-			if (this.gl.getShaderInfoLog(this.vertexShader) !== "") console.warn(`${this.gl.getShaderInfoLog(this.vertexShader)}\nVertex Shader\n${addLineNumbers(vertex)}`);
-		}
-		if (fragment) {
-			this.gl.shaderSource(this.fragmentShader, fragment);
-			this.gl.compileShader(this.fragmentShader);
-			if (this.gl.getShaderInfoLog(this.fragmentShader) !== "") console.warn(`${this.gl.getShaderInfoLog(this.fragmentShader)}\nFragment Shader\n${addLineNumbers(fragment)}`);
-		}
-		this.gl.linkProgram(this.program);
-		if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) return console.warn(this.gl.getProgramInfoLog(this.program));
-		this.uniformLocations = /* @__PURE__ */ new Map();
-		let numUniforms = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORMS);
-		for (let uIndex = 0; uIndex < numUniforms; uIndex++) {
-			let uniform = this.gl.getActiveUniform(this.program, uIndex);
-			this.uniformLocations.set(uniform, this.gl.getUniformLocation(this.program, uniform.name));
-			const split = uniform.name.match(/(\w+)/g);
-			uniform.uniformName = split[0];
-			uniform.nameComponents = split.slice(1);
-		}
-		this.attributeLocations = /* @__PURE__ */ new Map();
-		const locations = [];
-		const numAttribs = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_ATTRIBUTES);
-		for (let aIndex = 0; aIndex < numAttribs; aIndex++) {
-			const attribute = this.gl.getActiveAttrib(this.program, aIndex);
-			const location = this.gl.getAttribLocation(this.program, attribute.name);
-			if (location === -1) continue;
-			locations[location] = attribute.name;
-			this.attributeLocations.set(attribute, location);
-		}
-		this.attributeOrder = locations.join("");
-	}
-	setBlendFunc(src, dst, srcAlpha, dstAlpha) {
-		this.blendFunc.src = src;
-		this.blendFunc.dst = dst;
-		this.blendFunc.srcAlpha = srcAlpha;
-		this.blendFunc.dstAlpha = dstAlpha;
-		if (src) this.transparent = true;
-	}
-	setBlendEquation(modeRGB, modeAlpha) {
-		this.blendEquation.modeRGB = modeRGB;
-		this.blendEquation.modeAlpha = modeAlpha;
-	}
-	setStencilFunc(func, ref, mask) {
-		this.stencilRef = ref;
-		this.stencilFunc.func = func;
-		this.stencilFunc.ref = ref;
-		this.stencilFunc.mask = mask;
-	}
-	setStencilOp(stencilFail, depthFail, depthPass) {
-		this.stencilOp.stencilFail = stencilFail;
-		this.stencilOp.depthFail = depthFail;
-		this.stencilOp.depthPass = depthPass;
-	}
-	applyState() {
-		if (this.depthTest) this.gl.renderer.enable(this.gl.DEPTH_TEST);
-		else this.gl.renderer.disable(this.gl.DEPTH_TEST);
-		if (this.cullFace) this.gl.renderer.enable(this.gl.CULL_FACE);
-		else this.gl.renderer.disable(this.gl.CULL_FACE);
-		if (this.blendFunc.src) this.gl.renderer.enable(this.gl.BLEND);
-		else this.gl.renderer.disable(this.gl.BLEND);
-		if (this.cullFace) this.gl.renderer.setCullFace(this.cullFace);
-		this.gl.renderer.setFrontFace(this.frontFace);
-		this.gl.renderer.setDepthMask(this.depthWrite);
-		this.gl.renderer.setDepthFunc(this.depthFunc);
-		if (this.blendFunc.src) this.gl.renderer.setBlendFunc(this.blendFunc.src, this.blendFunc.dst, this.blendFunc.srcAlpha, this.blendFunc.dstAlpha);
-		this.gl.renderer.setBlendEquation(this.blendEquation.modeRGB, this.blendEquation.modeAlpha);
-		if (this.stencilFunc.func || this.stencilOp.stencilFail) this.gl.renderer.enable(this.gl.STENCIL_TEST);
-		else this.gl.renderer.disable(this.gl.STENCIL_TEST);
-		this.gl.renderer.setStencilFunc(this.stencilFunc.func, this.stencilFunc.ref, this.stencilFunc.mask);
-		this.gl.renderer.setStencilOp(this.stencilOp.stencilFail, this.stencilOp.depthFail, this.stencilOp.depthPass);
-	}
-	use({ flipFaces = false } = {}) {
-		let textureUnit = -1;
-		if (!(this.gl.renderer.state.currentProgram === this.id)) {
-			this.gl.useProgram(this.program);
-			this.gl.renderer.state.currentProgram = this.id;
-		}
-		this.uniformLocations.forEach((location, activeUniform) => {
-			let uniform = this.uniforms[activeUniform.uniformName];
-			for (const component of activeUniform.nameComponents) {
-				if (!uniform) break;
-				if (component in uniform) uniform = uniform[component];
-				else if (Array.isArray(uniform.value)) break;
-				else {
-					uniform = void 0;
-					break;
-				}
-			}
-			if (!uniform) return warn(`Active uniform ${activeUniform.name} has not been supplied`);
-			if (uniform && uniform.value === void 0) return warn(`${activeUniform.name} uniform is missing a value parameter`);
-			if (uniform.value.texture) {
-				textureUnit = textureUnit + 1;
-				uniform.value.update(textureUnit);
-				return setUniform(this.gl, activeUniform.type, location, textureUnit);
-			}
-			if (uniform.value.length && uniform.value[0].texture) {
-				const textureUnits = [];
-				uniform.value.forEach((value) => {
-					textureUnit = textureUnit + 1;
-					value.update(textureUnit);
-					textureUnits.push(textureUnit);
-				});
-				return setUniform(this.gl, activeUniform.type, location, textureUnits);
-			}
-			setUniform(this.gl, activeUniform.type, location, uniform.value);
-		});
-		this.applyState();
-		if (flipFaces) this.gl.renderer.setFrontFace(this.frontFace === this.gl.CCW ? this.gl.CW : this.gl.CCW);
-	}
-	remove() {
-		this.gl.deleteProgram(this.program);
-	}
-};
-function setUniform(gl, type, location, value) {
-	value = value.length ? flatten(value) : value;
-	const setValue = gl.renderer.state.uniformLocations.get(location);
-	if (value.length) if (setValue === void 0 || setValue.length !== value.length) gl.renderer.state.uniformLocations.set(location, value.slice(0));
-	else {
-		if (arraysEqual(setValue, value)) return;
-		setValue.set ? setValue.set(value) : setArray(setValue, value);
-		gl.renderer.state.uniformLocations.set(location, setValue);
-	}
-	else {
-		if (setValue === value) return;
-		gl.renderer.state.uniformLocations.set(location, value);
-	}
-	switch (type) {
-		case 5126: return value.length ? gl.uniform1fv(location, value) : gl.uniform1f(location, value);
-		case 35664: return gl.uniform2fv(location, value);
-		case 35665: return gl.uniform3fv(location, value);
-		case 35666: return gl.uniform4fv(location, value);
-		case 35670:
-		case 5124:
-		case 35678:
-		case 36306:
-		case 35680:
-		case 36289: return value.length ? gl.uniform1iv(location, value) : gl.uniform1i(location, value);
-		case 35671:
-		case 35667: return gl.uniform2iv(location, value);
-		case 35672:
-		case 35668: return gl.uniform3iv(location, value);
-		case 35673:
-		case 35669: return gl.uniform4iv(location, value);
-		case 35674: return gl.uniformMatrix2fv(location, false, value);
-		case 35675: return gl.uniformMatrix3fv(location, false, value);
-		case 35676: return gl.uniformMatrix4fv(location, false, value);
-	}
-}
-function addLineNumbers(string) {
-	let lines = string.split("\n");
-	for (let i = 0; i < lines.length; i++) lines[i] = i + 1 + ": " + lines[i];
-	return lines.join("\n");
-}
-function flatten(a) {
-	const arrayLen = a.length;
-	const valueLen = a[0].length;
-	if (valueLen === void 0) return a;
-	const length = arrayLen * valueLen;
-	let value = arrayCacheF32[length];
-	if (!value) arrayCacheF32[length] = value = new Float32Array(length);
-	for (let i = 0; i < arrayLen; i++) value.set(a[i], i * valueLen);
-	return value;
-}
-function arraysEqual(a, b) {
-	if (a.length !== b.length) return false;
-	for (let i = 0, l = a.length; i < l; i++) if (a[i] !== b[i]) return false;
-	return true;
-}
-function setArray(a, b) {
-	for (let i = 0, l = a.length; i < l; i++) a[i] = b[i];
-}
-var warnCount = 0;
-function warn(message) {
-	if (warnCount > 100) return;
-	console.warn(message);
-	warnCount++;
-	if (warnCount > 100) console.warn("More than 100 program warnings - stopping logs.");
-}
-//#endregion
 //#region node_modules/ogl/src/core/Renderer.js
-var tempVec3 = /* @__PURE__ */ new Vec3();
-var ID$1 = 1;
+var tempVec3$1 = /* @__PURE__ */ new Vec3();
+var ID$2 = 1;
 var Renderer = class {
 	constructor({ canvas = document.createElement("canvas"), width = 300, height = 150, dpr = 1, alpha = false, depth = true, stencil = false, antialias = false, premultipliedAlpha = false, preserveDrawingBuffer = false, powerPreference = "default", autoClear = true, webgl = 2 } = {}) {
 		const attributes = {
@@ -927,7 +752,7 @@ var Renderer = class {
 		this.stencil = stencil;
 		this.premultipliedAlpha = premultipliedAlpha;
 		this.autoClear = autoClear;
-		this.id = ID$1++;
+		this.id = ID$2++;
 		if (webgl === 2) this.gl = canvas.getContext("webgl2", attributes);
 		this.isWebgl2 = !!this.gl;
 		if (!this.gl) this.gl = canvas.getContext("webgl", attributes);
@@ -1133,9 +958,9 @@ var Renderer = class {
 				else ui.push(node);
 				node.zDepth = 0;
 				if (node.renderOrder !== 0 || !node.program.depthTest || !camera) return;
-				node.worldMatrix.getTranslation(tempVec3);
-				tempVec3.applyMatrix4(camera.projectionViewMatrix);
-				node.zDepth = tempVec3.z;
+				node.worldMatrix.getTranslation(tempVec3$1);
+				tempVec3$1.applyMatrix4(camera.projectionViewMatrix);
+				node.zDepth = tempVec3$1.z;
 			});
 			opaque.sort(this.sortOpaque);
 			transparent.sort(this.sortTransparent);
@@ -3153,13 +2978,13 @@ var Mat3 = class extends Array {
 };
 //#endregion
 //#region node_modules/ogl/src/core/Mesh.js
-var ID = 0;
+var ID$1 = 0;
 var Mesh = class extends Transform {
 	constructor(gl, { geometry, program, mode = gl.TRIANGLES, frustumCulled = true, renderOrder = 0 } = {}) {
 		super();
 		if (!gl.canvas) console.error("gl not passed as first argument to Mesh");
 		this.gl = gl;
-		this.id = ID++;
+		this.id = ID$1++;
 		this.geometry = geometry;
 		this.program = program;
 		this.mode = mode;
@@ -3211,6 +3036,181 @@ var Mesh = class extends Transform {
 			mesh: this,
 			camera
 		}));
+	}
+};
+//#endregion
+//#region node_modules/ogl/src/core/Geometry.js
+var tempVec3 = /* @__PURE__ */ new Vec3();
+var ID = 1;
+var ATTR_ID = 1;
+var isBoundsWarned = false;
+var Geometry = class {
+	constructor(gl, attributes = {}) {
+		if (!gl.canvas) console.error("gl not passed as first argument to Geometry");
+		this.gl = gl;
+		this.attributes = attributes;
+		this.id = ID++;
+		this.VAOs = {};
+		this.drawRange = {
+			start: 0,
+			count: 0
+		};
+		this.instancedCount = 0;
+		this.gl.renderer.bindVertexArray(null);
+		this.gl.renderer.currentGeometry = null;
+		this.glState = this.gl.renderer.state;
+		for (let key in attributes) this.addAttribute(key, attributes[key]);
+	}
+	addAttribute(key, attr) {
+		this.attributes[key] = attr;
+		attr.id = ATTR_ID++;
+		attr.size = attr.size || 1;
+		attr.type = attr.type || (attr.data.constructor === Float32Array ? this.gl.FLOAT : attr.data.constructor === Uint16Array ? this.gl.UNSIGNED_SHORT : this.gl.UNSIGNED_INT);
+		attr.target = key === "index" ? this.gl.ELEMENT_ARRAY_BUFFER : this.gl.ARRAY_BUFFER;
+		attr.normalized = attr.normalized || false;
+		attr.stride = attr.stride || 0;
+		attr.offset = attr.offset || 0;
+		attr.count = attr.count || (attr.stride ? attr.data.byteLength / attr.stride : attr.data.length / attr.size);
+		attr.divisor = attr.instanced || 0;
+		attr.needsUpdate = false;
+		attr.usage = attr.usage || this.gl.STATIC_DRAW;
+		if (!attr.buffer) this.updateAttribute(attr);
+		if (attr.divisor) {
+			this.isInstanced = true;
+			if (this.instancedCount && this.instancedCount !== attr.count * attr.divisor) {
+				console.warn("geometry has multiple instanced buffers of different length");
+				return this.instancedCount = Math.min(this.instancedCount, attr.count * attr.divisor);
+			}
+			this.instancedCount = attr.count * attr.divisor;
+		} else if (key === "index") this.drawRange.count = attr.count;
+		else if (!this.attributes.index) this.drawRange.count = Math.max(this.drawRange.count, attr.count);
+	}
+	updateAttribute(attr) {
+		const isNewBuffer = !attr.buffer;
+		if (isNewBuffer) attr.buffer = this.gl.createBuffer();
+		if (this.glState.boundBuffer !== attr.buffer) {
+			this.gl.bindBuffer(attr.target, attr.buffer);
+			this.glState.boundBuffer = attr.buffer;
+		}
+		if (isNewBuffer) this.gl.bufferData(attr.target, attr.data, attr.usage);
+		else this.gl.bufferSubData(attr.target, 0, attr.data);
+		attr.needsUpdate = false;
+	}
+	setIndex(value) {
+		this.addAttribute("index", value);
+	}
+	setDrawRange(start, count) {
+		this.drawRange.start = start;
+		this.drawRange.count = count;
+	}
+	setInstancedCount(value) {
+		this.instancedCount = value;
+	}
+	createVAO(program) {
+		this.VAOs[program.attributeOrder] = this.gl.renderer.createVertexArray();
+		this.gl.renderer.bindVertexArray(this.VAOs[program.attributeOrder]);
+		this.bindAttributes(program);
+	}
+	bindAttributes(program) {
+		program.attributeLocations.forEach((location, { name, type }) => {
+			if (!this.attributes[name]) {
+				console.warn(`active attribute ${name} not being supplied`);
+				return;
+			}
+			const attr = this.attributes[name];
+			this.gl.bindBuffer(attr.target, attr.buffer);
+			this.glState.boundBuffer = attr.buffer;
+			let numLoc = 1;
+			if (type === 35674) numLoc = 2;
+			if (type === 35675) numLoc = 3;
+			if (type === 35676) numLoc = 4;
+			const size = attr.size / numLoc;
+			const stride = numLoc === 1 ? 0 : numLoc * numLoc * 4;
+			const offset = numLoc === 1 ? 0 : numLoc * 4;
+			for (let i = 0; i < numLoc; i++) {
+				this.gl.vertexAttribPointer(location + i, size, attr.type, attr.normalized, attr.stride + stride, attr.offset + i * offset);
+				this.gl.enableVertexAttribArray(location + i);
+				this.gl.renderer.vertexAttribDivisor(location + i, attr.divisor);
+			}
+		});
+		if (this.attributes.index) this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.attributes.index.buffer);
+	}
+	draw({ program, mode = this.gl.TRIANGLES }) {
+		if (this.gl.renderer.currentGeometry !== `${this.id}_${program.attributeOrder}`) {
+			if (!this.VAOs[program.attributeOrder]) this.createVAO(program);
+			this.gl.renderer.bindVertexArray(this.VAOs[program.attributeOrder]);
+			this.gl.renderer.currentGeometry = `${this.id}_${program.attributeOrder}`;
+		}
+		program.attributeLocations.forEach((location, { name }) => {
+			const attr = this.attributes[name];
+			if (attr.needsUpdate) this.updateAttribute(attr);
+		});
+		let indexBytesPerElement = 2;
+		if (this.attributes.index?.type === this.gl.UNSIGNED_INT) indexBytesPerElement = 4;
+		if (this.isInstanced) if (this.attributes.index) this.gl.renderer.drawElementsInstanced(mode, this.drawRange.count, this.attributes.index.type, this.attributes.index.offset + this.drawRange.start * indexBytesPerElement, this.instancedCount);
+		else this.gl.renderer.drawArraysInstanced(mode, this.drawRange.start, this.drawRange.count, this.instancedCount);
+		else if (this.attributes.index) this.gl.drawElements(mode, this.drawRange.count, this.attributes.index.type, this.attributes.index.offset + this.drawRange.start * indexBytesPerElement);
+		else this.gl.drawArrays(mode, this.drawRange.start, this.drawRange.count);
+	}
+	getPosition() {
+		const attr = this.attributes.position;
+		if (attr.data) return attr;
+		if (isBoundsWarned) return;
+		console.warn("No position buffer data found to compute bounds");
+		return isBoundsWarned = true;
+	}
+	computeBoundingBox(attr) {
+		if (!attr) attr = this.getPosition();
+		const array = attr.data;
+		const stride = attr.size;
+		if (!this.bounds) this.bounds = {
+			min: new Vec3(),
+			max: new Vec3(),
+			center: new Vec3(),
+			scale: new Vec3(),
+			radius: Infinity
+		};
+		const min = this.bounds.min;
+		const max = this.bounds.max;
+		const center = this.bounds.center;
+		const scale = this.bounds.scale;
+		min.set(Infinity);
+		max.set(-Infinity);
+		for (let i = 0, l = array.length; i < l; i += stride) {
+			const x = array[i];
+			const y = array[i + 1];
+			const z = array[i + 2];
+			min.x = Math.min(x, min.x);
+			min.y = Math.min(y, min.y);
+			min.z = Math.min(z, min.z);
+			max.x = Math.max(x, max.x);
+			max.y = Math.max(y, max.y);
+			max.z = Math.max(z, max.z);
+		}
+		scale.sub(max, min);
+		center.add(min, max).divide(2);
+	}
+	computeBoundingSphere(attr) {
+		if (!attr) attr = this.getPosition();
+		const array = attr.data;
+		const stride = attr.size;
+		if (!this.bounds) this.computeBoundingBox(attr);
+		let maxRadiusSq = 0;
+		for (let i = 0, l = array.length; i < l; i += stride) {
+			tempVec3.fromArray(array, i);
+			maxRadiusSq = Math.max(maxRadiusSq, this.bounds.center.squaredDistance(tempVec3));
+		}
+		this.bounds.radius = Math.sqrt(maxRadiusSq);
+	}
+	remove() {
+		for (let key in this.VAOs) {
+			this.gl.renderer.deleteVertexArray(this.VAOs[key]);
+			delete this.VAOs[key];
+		}
+		for (let key in this.attributes) {
+			this.gl.deleteBuffer(this.attributes[key].buffer);
+			delete this.attributes[key];
+		}
 	}
 };
 //#endregion

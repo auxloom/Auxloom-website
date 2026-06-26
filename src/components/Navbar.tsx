@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useModals } from "./ModalProvider";
 
 const links = [
   // Hrefs point at the per-section eyebrow elements (not the section
@@ -13,6 +14,8 @@ const links = [
 ];
 
 export default function Navbar() {
+  const { openBooking } = useModals();
+
   return (
     <header className="fixed top-4 left-1/2 z-50 w-[min(1100px,calc(100vw-2rem))] -translate-x-1/2">
       <div className="glass-pill flex items-center justify-between gap-3 px-4 py-1.5 sm:px-6 shadow-[0_10px_40px_-20px_rgba(0,0,30,0.6)]">
@@ -52,6 +55,10 @@ export default function Navbar() {
 
         <motion.a
           href="#contact"
+          onClick={(e) => {
+            e.preventDefault();
+            openBooking();
+          }}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
           data-cursor="view"

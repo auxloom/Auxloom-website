@@ -1,11 +1,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useModals } from "./ModalProvider";
 import s1 from "@/assets/service 1.png";
 import s2 from "@/assets/service 2.png";
 import s3 from "@/assets/service 3.png";
 import s4 from "@/assets/service 4.png";
 import s5 from "@/assets/service 5.png";
 import s6 from "@/assets/service 6.png";
+
 
 interface Service {
   title: string;
@@ -47,6 +49,7 @@ const services: Service[] = [
 ];
 
 export default function Services() {
+  const { openBooking } = useModals();
   // `open` is the index of the currently expanded service, or null if none.
   // The doodle box on the right mirrors whichever service the user has open.
   const [open, setOpen] = useState<number | null>(0);
@@ -111,6 +114,10 @@ export default function Services() {
                           </p>
                           <motion.a
                             href="#contact"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              openBooking(s.title);
+                            }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.97 }}
                             className="inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-white md:self-end"

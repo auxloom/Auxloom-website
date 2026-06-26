@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import PressureBand from "./PressureBand";
+import { useModals } from "./ModalProvider";
 
 const cols = [
   {
@@ -17,6 +18,8 @@ const cols = [
 ];
 
 export default function Footer() {
+  const { openContact } = useModals();
+
   return (
     <footer id="contact" className="bg-background px-6 pb-10 pt-6">
       <div className="mx-auto max-w-7xl">
@@ -32,6 +35,10 @@ export default function Footer() {
           </p>
           <motion.a
             href="mailto:hello@auxloom.ai"
+            onClick={(e) => {
+              e.preventDefault();
+              openContact();
+            }}
             data-cursor="view"
             data-cursor-label="Talk"
             whileHover={{ scale: 1.05 }}
@@ -68,22 +75,46 @@ export default function Footer() {
               ideas other teams only talk about.
             </p>
           </div>
-          {cols.map((c) => (
-            <div key={c.title}>
-              <h4 className="text-[11px] uppercase tracking-[0.25em] text-foreground/80">
-                {c.title}
-              </h4>
-              <ul className="mt-5 space-y-3 text-sm text-foreground/60">
-                {c.items.map((i) => (
-                  <li key={i}>
-                    <a href="#" className="transition-colors hover:text-foreground">
-                      {i}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {cols.map((c) => {
+            const getHref = (colTitle: string, item: string) => {
+              if (colTitle === "Menu") {
+                switch (item) {
+                  case "Home": return "#top";
+                  case "Services": return "#eyebrow-services";
+                  case "Projects": return "#eyebrow-projects";
+                  case "About Us": return "#eyebrow-about";
+                  case "Blogs": return "#eyebrow-blogs";
+                }
+              }
+              if (colTitle === "Services") {
+                return "#eyebrow-services";
+              }
+              if (colTitle === "Social Media") {
+                return "#top";
+              }
+              return "#";
+            };
+
+            return (
+              <div key={c.title}>
+                <h4 className="text-[11px] uppercase tracking-[0.25em] text-foreground/80">
+                  {c.title}
+                </h4>
+                <ul className="mt-5 space-y-3 text-sm text-foreground/60">
+                  {c.items.map((i) => (
+                    <li key={i}>
+                      <a
+                        href={getHref(c.title, i)}
+                        className="transition-colors hover:text-foreground"
+                      >
+                        {i}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-foreground/50 sm:flex-row">

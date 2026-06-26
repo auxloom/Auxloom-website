@@ -1,9 +1,10 @@
-import { o as __toESM } from "../_runtime.mjs";
+import { s as __toESM } from "../__23tanstack-start-server-fn-resolver-CG54XWCZ.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as AnimatePresence } from "../_libs/framer-motion.mjs";
 import { t as motion } from "../_libs/motion.mjs";
+import { n as useModals } from "./ModalProvider-ixUKh8ju.mjs";
 import { i as Program, n as Mesh, r as Renderer, t as Triangle } from "../_libs/ogl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DkR1tzBS.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-FilGnA1-.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 /**
@@ -176,6 +177,7 @@ var links = [
 	}
 ];
 function Navbar() {
+	const { openBooking } = useModals();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
 		className: "fixed top-4 left-1/2 z-50 w-[min(1100px,calc(100vw-2rem))] -translate-x-1/2",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -206,6 +208,10 @@ function Navbar() {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.a, {
 					href: "#contact",
+					onClick: (e) => {
+						e.preventDefault();
+						openBooking();
+					},
 					whileHover: { scale: 1.04 },
 					whileTap: { scale: .97 },
 					"data-cursor": "view",
@@ -229,7 +235,7 @@ function Navbar() {
 	});
 }
 var buildKeyframes = (from, steps) => {
-	const keys = new Set([...Object.keys(from), ...steps.flatMap((s) => Object.keys(s))]);
+	const keys = /* @__PURE__ */ new Set([...Object.keys(from), ...steps.flatMap((s) => Object.keys(s))]);
 	const out = {};
 	keys.forEach((k) => {
 		out[k] = [from[k], ...steps.map((s) => s[k])];
@@ -780,6 +786,7 @@ var services = [
 	}
 ];
 function Services() {
+	const { openBooking } = useModals();
 	const [open, setOpen] = (0, import_react.useState)(0);
 	const activeIdx = open ?? 0;
 	const activeImage = services[activeIdx].image;
@@ -859,6 +866,10 @@ function Services() {
 												children: s.body
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.a, {
 												href: "#contact",
+												onClick: (e) => {
+													e.preventDefault();
+													openBooking(s.title);
+												},
 												whileHover: { scale: 1.05 },
 												whileTap: { scale: .97 },
 												className: "inline-flex items-center gap-2 self-start rounded-full bg-neutral-900 px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-white md:self-end",
@@ -940,73 +951,149 @@ function Projects() {
 		})
 	});
 }
-var posts = [
+var blogs_data_default = [
 	{
-		eyebrow: "Engineering",
-		title: "Designing MCP Servers for Production AI Workflows",
-		excerpt: "A practical look at building Model Context Protocol servers that hold up under real load — schema versioning, tool-call retries, and graceful fallbacks when an upstream LLM misbehaves.",
-		readTime: "7 min read",
-		date: "May 2026"
+		"eyebrow": "Engineering",
+		"title": "Designing MCP Servers for Production AI Workflows",
+		"excerpt": "A practical look at building Model Context Protocol servers that hold up under real load — schema versioning, tool-call retries, and graceful fallbacks when an upstream LLM misbehaves.",
+		"readTime": "7 min read",
+		"date": "May 2026",
+		"content": [
+			"The Model Context Protocol (MCP) has emerged as a key standard for connecting Large Language Models to real-world data sources and APIs. However, moving from a local sandbox to production-ready MCP setups brings a set of unique engineering hurdles.",
+			"First and foremost is protocol schema stability. When your LLM agents are executing tool calls dynamically, any schema mismatch or undefined parameter can cause the agent loop to crash or trigger hallucinations. In production, we recommend versioning all tool definitions and implementing strong JSON-Schema parsing wrappers around every handler.",
+			"Secondly, network resilience is paramount. Upstream API calls fail, LLMs fail to respond, and rate-limits are reached. A production MCP server must implement smart retry policies, token bucket rate-limiting, and standard fallback mechanisms. For example, if a database query times out, the MCP server should return a structured error description rather than throwing an unhandled exception.",
+			"Finally, observability cannot be ignored. Every tool call, prompt template hydration, and resource request should be logged with unique tracing identifiers. This allows you to reconstruct the exact decision trajectory of your AI agents when diagnosing issues."
+		]
 	},
 	{
-		eyebrow: "AI",
-		title: "When to Reach for an Agent — and When Not To",
-		excerpt: "Agentic loops are tempting, but most production AI problems collapse into a well-scoped retrieval + structured-output pipeline. Here's the decision rubric we use at Auxloom before we commit.",
-		readTime: "5 min read",
-		date: "April 2026"
+		"eyebrow": "AI",
+		"title": "When to Reach for an Agent — and When Not To",
+		"excerpt": "Agentic loops are tempting, but most production AI problems collapse into a well-scoped retrieval + structured-output pipeline. Here's the decision rubric we use at Auxloom before we commit.",
+		"readTime": "5 min read",
+		"date": "April 2026",
+		"content": [
+			"AI agents with autonomous decision loops and multi-step tool execution are highly appealing to write. However, in production systems, unpredictability and high latency can quickly turn agentic designs into liabilities.",
+			"At Auxloom, we follow a simple rubric before committing to an agentic architecture. Most business processes are highly structured and don't need general autonomous planning. Instead, they collapse into deterministic pipelines using structured outputs (JSON schemas) and retrieval-augmented generation (RAG).",
+			"For instance, if your system needs to parse an email, fetch customer details from a database, and generate a draft response, a structured pipeline is faster, cheaper, and 100% reliable compared to letting an agent decide what steps to take. We only choose autonomous agents when the tool execution path is highly dynamic and cannot be predicted at compile time.",
+			"By keeping your AI logic as deterministic as possible, you minimize latency, save API costs, and build a system that is far easier to test and maintain."
+		]
 	},
 	{
-		eyebrow: "Automation",
-		title: "SaaS Modernisation Without the Rewrite",
-		excerpt: "You don't need to throw the legacy stack away to ship AI features. We walk through the strangler-fig pattern we used to layer an intelligent automation layer on top of a 9-year-old SaaS product.",
-		readTime: "9 min read",
-		date: "March 2026"
+		"eyebrow": "Automation",
+		"title": "SaaS Modernisation Without the Rewrite",
+		"excerpt": "You don't need to throw the legacy stack away to ship AI features. We walk through the strangler-fig pattern we used to layer an intelligent automation layer on top of a 9-year-old SaaS product.",
+		"readTime": "9 min read",
+		"date": "March 2026",
+		"content": [
+			"Rewriting legacy SaaS applications from scratch is a high-risk gamble that rarely pays off on schedule. Fortunately, layering intelligent AI features and automated workflows on top of existing applications is entirely viable using the Strangler-Fig pattern.",
+			"The Strangler-Fig pattern allows you to gradually replace or augment parts of your legacy system by building new services around the perimeter of the monolith, routing traffic dynamically based on target rules.",
+			"At Auxloom, we implemented this for a 9-year-old legacy CRM. Instead of refactoring their complex SQL queries and outdated frontends, we built an automation proxy layer. This proxy intercept database writes and routes them to serverless automation routines that invoke AI models, update external services, and write back results via standard APIs.",
+			"This approach allowed us to deploy advanced automated task scheduling and intelligent lead scoring in less than four weeks, with zero downtime and absolutely no changes to the core legacy codebase."
+		]
+	},
+	{
+		"eyebrow": "Automation",
+		"title": "SaaS Modernisation Without the Rewrite",
+		"excerpt": "You don't need to throw the legacy stack away to ship AI features. We walk through the strangler-fig pattern we used to layer an intelligent automation layer on top of a 9-year-old SaaS product.",
+		"readTime": "9 min read",
+		"date": "March 2026",
+		"content": [
+			"Rewriting legacy SaaS applications from scratch is a high-risk gamble that rarely pays off on schedule. Fortunately, layering intelligent AI features and automated workflows on top of existing applications is entirely viable using the Strangler-Fig pattern.",
+			"The Strangler-Fig pattern allows you to gradually replace or augment parts of your legacy system by building new services around the perimeter of the monolith, routing traffic dynamically based on target rules.",
+			"At Auxloom, we implemented this for a 9-year-old legacy CRM. Instead of refactoring their complex SQL queries and outdated frontends, we built an automation proxy layer. This proxy intercept database writes and routes them to serverless automation routines that invoke AI models, update external services, and write back results via standard APIs.",
+			"This approach allowed us to deploy advanced automated task scheduling and intelligent lead scoring in less than four weeks, with zero downtime and absolutely no changes to the core legacy codebase."
+		]
+	},
+	{
+		"eyebrow": "AI",
+		"title": "When to Reach for an Agent — and When Not To",
+		"excerpt": "Agentic loops are tempting, but most production AI problems collapse into a well-scoped retrieval + structured-output pipeline. Here's the decision rubric we use at Auxloom before we commit.",
+		"readTime": "5 min read",
+		"date": "April 2026",
+		"content": [
+			"AI agents with autonomous decision loops and multi-step tool execution are highly appealing to write. However, in production systems, unpredictability and high latency can quickly turn agentic designs into liabilities.",
+			"At Auxloom, we follow a simple rubric before committing to an agentic architecture. Most business processes are highly structured and don't need general autonomous planning. Instead, they collapse into deterministic pipelines using structured outputs (JSON schemas) and retrieval-augmented generation (RAG).",
+			"For instance, if your system needs to parse an email, fetch customer details from a database, and generate a draft response, a structured pipeline is faster, cheaper, and 100% reliable compared to letting an agent decide what steps to take. We only choose autonomous agents when the tool execution path is highly dynamic and cannot be predicted at compile time.",
+			"By keeping your AI logic as deterministic as possible, you minimize latency, save API costs, and build a system that is far easier to test and maintain."
+		]
+	},
+	{
+		"eyebrow": "Engineering",
+		"title": "Designing MCP Servers for Production AI Workflows",
+		"excerpt": "A practical look at building Model Context Protocol servers that hold up under real load — schema versioning, tool-call retries, and graceful fallbacks when an upstream LLM misbehaves.",
+		"readTime": "7 min read",
+		"date": "May 2026",
+		"content": [
+			"The Model Context Protocol (MCP) has emerged as a key standard for connecting Large Language Models to real-world data sources and APIs. However, moving from a local sandbox to production-ready MCP setups brings a set of unique engineering hurdles.",
+			"First and foremost is protocol schema stability. When your LLM agents are executing tool calls dynamically, any schema mismatch or undefined parameter can cause the agent loop to crash or trigger hallucinations. In production, we recommend versioning all tool definitions and implementing strong JSON-Schema parsing wrappers around every handler.",
+			"Secondly, network resilience is paramount. Upstream API calls fail, LLMs fail to respond, and rate-limits are reached. A production MCP server must implement smart retry policies, token bucket rate-limiting, and standard fallback mechanisms. For example, if a database query times out, the MCP server should return a structured error description rather than throwing an unhandled exception.",
+			"Finally, observability cannot be ignored. Every tool call, prompt template hydration, and resource request should be logged with unique tracing identifiers. This allows you to reconstruct the exact decision trajectory of your AI agents when diagnosing issues."
+		]
 	}
 ];
 function Blogs() {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+	const scrollRef = (0, import_react.useRef)(null);
+	const [selectedBlog, setSelectedBlog] = (0, import_react.useState)(null);
+	const handleScroll = (direction) => {
+		const container = scrollRef.current;
+		if (!container) return;
+		const firstCard = container.firstElementChild;
+		const cardWidth = firstCard ? firstCard.offsetWidth + 24 : 392;
+		const scrollAmount = direction === "left" ? -cardWidth : cardWidth;
+		container.scrollBy({
+			left: scrollAmount,
+			behavior: "smooth"
+		});
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "blogs",
-		className: "bg-background px-6 pt-28 pb-28",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mx-auto max-w-6xl",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					id: "eyebrow-blogs",
-					className: "mb-6 flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.3em] text-foreground/50",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px w-10 bg-foreground/30" }),
-						"Blogs",
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px w-10 bg-foreground/30" })
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.h2, {
-					initial: {
-						opacity: 0,
-						y: 16
-					},
-					whileInView: {
-						opacity: 1,
-						y: 0
-					},
-					viewport: { once: true },
-					transition: { duration: .6 },
-					className: "text-display text-center text-5xl font-light leading-none sm:text-6xl md:text-7xl",
-					children: "Field notes from the studio"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
-					initial: { opacity: 0 },
-					whileInView: { opacity: 1 },
-					viewport: { once: true },
-					transition: {
-						delay: .2,
-						duration: .6
-					},
-					className: "mx-auto mt-5 max-w-xl text-center text-sm text-foreground/60",
-					children: "Writing on the systems we ship, the mistakes we make, and where applied AI actually moves the needle."
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mt-16 grid gap-6 md:grid-cols-3",
-					children: posts.map((p, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.article, {
+		className: "bg-background pt-28 pb-28 overflow-hidden",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mx-auto max-w-6xl px-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						id: "eyebrow-blogs",
+						className: "mb-6 flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.3em] text-foreground/50",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px w-10 bg-foreground/30" }),
+							"Blogs",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px w-10 bg-foreground/30" })
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.h2, {
+						initial: {
+							opacity: 0,
+							y: 16
+						},
+						whileInView: {
+							opacity: 1,
+							y: 0
+						},
+						viewport: { once: true },
+						transition: { duration: .6 },
+						className: "text-display text-center text-5xl font-light leading-none sm:text-6xl md:text-7xl",
+						children: "Field notes from the studio"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
+						initial: { opacity: 0 },
+						whileInView: { opacity: 1 },
+						viewport: { once: true },
+						transition: {
+							delay: .2,
+							duration: .6
+						},
+						className: "mx-auto mt-5 max-w-xl text-center text-sm text-foreground/60",
+						children: "Writing on the systems we ship, the mistakes we make, and where applied AI actually moves the needle."
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative mt-16 w-full",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					ref: scrollRef,
+					className: "flex w-full overflow-x-auto gap-6 pb-6 pt-2 scroll-smooth snap-x snap-mandatory scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-[max(1.5rem,calc((100vw-1152px)/2))]",
+					children: blogs_data_default.map((p, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.article, {
 						"data-cursor": "hover",
 						initial: {
 							opacity: 0,
@@ -1024,7 +1111,7 @@ function Blogs() {
 							delay: i * .1,
 							duration: .5
 						},
-						className: "group flex h-full flex-col rounded-2xl border border-white/10 bg-card/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[var(--shadow-glow)]",
+						className: "group flex h-full flex-col rounded-2xl border border-white/10 bg-card/40 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[var(--shadow-glow)] w-[calc(100vw-3rem)] sm:w-[340px] md:w-[368px] shrink-0 snap-start",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-foreground/50",
@@ -1043,9 +1130,12 @@ function Blogs() {
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-[11px] uppercase tracking-[0.2em] text-foreground/45",
 									children: p.readTime
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-									href: "#",
-									className: "inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.25em] text-foreground/80 transition-colors group-hover:text-foreground",
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: (e) => {
+										e.preventDefault();
+										setSelectedBlog(p);
+									},
+									className: "inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.25em] text-foreground/80 transition-colors group-hover:text-foreground cursor-pointer",
 									children: ["Read More", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										"aria-hidden": true,
 										className: "inline-block transition-transform duration-300 group-hover:translate-x-1",
@@ -1055,9 +1145,102 @@ function Blogs() {
 							})
 						]
 					}, p.title))
-				})
-			]
-		})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mx-auto max-w-6xl px-6 mt-8 flex justify-center gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => handleScroll("left"),
+						className: "group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground transition-all hover:border-white/30 hover:bg-white/10",
+						"aria-label": "Scroll left",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "transition-transform group-hover:-translate-x-0.5",
+							children: "←"
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => handleScroll("right"),
+						className: "group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground transition-all hover:border-white/30 hover:bg-white/10",
+						"aria-label": "Scroll right",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "transition-transform group-hover:translate-x-0.5",
+							children: "→"
+						})
+					})]
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: selectedBlog && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "fixed inset-0 z-50 flex items-center justify-center p-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: { opacity: 0 },
+					animate: { opacity: 1 },
+					exit: { opacity: 0 },
+					onClick: () => setSelectedBlog(null),
+					className: "absolute inset-0 bg-background/85 backdrop-blur-md"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 50,
+						scale: .95
+					},
+					animate: {
+						opacity: 1,
+						y: 0,
+						scale: 1
+					},
+					exit: {
+						opacity: 0,
+						y: 50,
+						scale: .95
+					},
+					transition: {
+						type: "spring",
+						stiffness: 300,
+						damping: 28
+					},
+					className: "relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl border border-white/10 bg-card p-6 shadow-2xl sm:p-10 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-start justify-between border-b border-white/5 pb-5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-foreground/50",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: selectedBlog.eyebrow }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "•" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: selectedBlog.date })
+									]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									className: "text-display mt-3 text-3xl font-light leading-tight text-foreground md:text-4xl",
+									children: selectedBlog.title
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "mt-2 text-xs text-foreground/45 uppercase tracking-wider",
+									children: selectedBlog.readTime
+								})
+							] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setSelectedBlog(null),
+								className: "rounded-full bg-white/5 p-2.5 text-foreground/60 transition-all hover:bg-white/10 hover:text-foreground hover:rotate-90",
+								"aria-label": "Close reader",
+								children: "✕"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mt-8 space-y-6 text-sm leading-relaxed text-foreground/80 font-light",
+							children: selectedBlog.content ? selectedBlog.content.map((paragraph, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: paragraph }, index)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: selectedBlog.excerpt })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mt-10 border-t border-white/5 pt-6 flex justify-end",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.03 },
+								whileTap: { scale: .97 },
+								onClick: () => setSelectedBlog(null),
+								className: "rounded-xl border border-white/15 bg-white/5 px-6 py-2.5 text-xs uppercase tracking-wider text-foreground hover:bg-white/10 transition-colors",
+								children: "Close Reader"
+							})
+						})
+					]
+				})]
+			}) })
+		]
 	});
 }
 var dist = (a, b) => {
@@ -1297,6 +1480,7 @@ var cols = [
 	}
 ];
 function Footer() {
+	const { openContact } = useModals();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("footer", {
 		id: "contact",
 		className: "bg-background px-6 pb-10 pt-6",
@@ -1320,6 +1504,10 @@ function Footer() {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.a, {
 							href: "mailto:hello@auxloom.ai",
+							onClick: (e) => {
+								e.preventDefault();
+								openContact();
+							},
 							"data-cursor": "view",
 							"data-cursor-label": "Talk",
 							whileHover: { scale: 1.05 },
@@ -1347,17 +1535,31 @@ function Footer() {
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "mt-5 max-w-sm text-sm text-foreground/60",
 						children: "We are an AI studio building intelligent systems — our job is to ship the ambitious ideas other teams only talk about."
-					})] }), cols.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-						className: "text-[11px] uppercase tracking-[0.25em] text-foreground/80",
-						children: c.title
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-						className: "mt-5 space-y-3 text-sm text-foreground/60",
-						children: c.items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-							href: "#",
-							className: "transition-colors hover:text-foreground",
-							children: i
-						}) }, i))
-					})] }, c.title))]
+					})] }), cols.map((c) => {
+						const getHref = (colTitle, item) => {
+							if (colTitle === "Menu") switch (item) {
+								case "Home": return "#top";
+								case "Services": return "#eyebrow-services";
+								case "Projects": return "#eyebrow-projects";
+								case "About Us": return "#eyebrow-about";
+								case "Blogs": return "#eyebrow-blogs";
+							}
+							if (colTitle === "Services") return "#eyebrow-services";
+							if (colTitle === "Social Media") return "#top";
+							return "#";
+						};
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							className: "text-[11px] uppercase tracking-[0.25em] text-foreground/80",
+							children: c.title
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+							className: "mt-5 space-y-3 text-sm text-foreground/60",
+							children: c.items.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+								href: getHref(c.title, i),
+								className: "transition-colors hover:text-foreground",
+								children: i
+							}) }, i))
+						})] }, c.title);
+					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-foreground/50 sm:flex-row",

@@ -1,4 +1,4 @@
-import { o as __toESM, t as __commonJSMin } from "../_runtime.mjs";
+import { n as __commonJSMin, s as __toESM } from "../__23tanstack-start-server-fn-resolver-CG54XWCZ.mjs";
 //#region node_modules/react/cjs/react.production.js
 /**
 * @license React
@@ -356,7 +356,7 @@ var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.useTransition = function() {
 		return ReactSharedInternals.H.useTransition();
 	};
-	exports.version = "19.2.5";
+	exports.version = "19.2.7";
 }));
 //#endregion
 //#region node_modules/react/index.js

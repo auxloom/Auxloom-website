@@ -1,77 +1,3 @@
-//#region node_modules/@tanstack/query-core/build/modern/subscribable.js
-var Subscribable = class {
-	constructor() {
-		this.listeners = /* @__PURE__ */ new Set();
-		this.subscribe = this.subscribe.bind(this);
-	}
-	subscribe(listener) {
-		this.listeners.add(listener);
-		this.onSubscribe();
-		return () => {
-			this.listeners.delete(listener);
-			this.onUnsubscribe();
-		};
-	}
-	hasListeners() {
-		return this.listeners.size > 0;
-	}
-	onSubscribe() {}
-	onUnsubscribe() {}
-};
-//#endregion
-//#region node_modules/@tanstack/query-core/build/modern/focusManager.js
-var FocusManager = class extends Subscribable {
-	#focused;
-	#cleanup;
-	#setup;
-	constructor() {
-		super();
-		this.#setup = (onFocus) => {
-			if (typeof window !== "undefined" && window.addEventListener) {
-				const listener = () => onFocus();
-				window.addEventListener("visibilitychange", listener, false);
-				return () => {
-					window.removeEventListener("visibilitychange", listener);
-				};
-			}
-		};
-	}
-	onSubscribe() {
-		if (!this.#cleanup) this.setEventListener(this.#setup);
-	}
-	onUnsubscribe() {
-		if (!this.hasListeners()) {
-			this.#cleanup?.();
-			this.#cleanup = void 0;
-		}
-	}
-	setEventListener(setup) {
-		this.#setup = setup;
-		this.#cleanup?.();
-		this.#cleanup = setup((focused) => {
-			if (typeof focused === "boolean") this.setFocused(focused);
-			else this.onFocus();
-		});
-	}
-	setFocused(focused) {
-		if (this.#focused !== focused) {
-			this.#focused = focused;
-			this.onFocus();
-		}
-	}
-	onFocus() {
-		const isFocused = this.isFocused();
-		this.listeners.forEach((listener) => {
-			listener(isFocused);
-		});
-	}
-	isFocused() {
-		if (typeof this.#focused === "boolean") return this.#focused;
-		return globalThis.document?.visibilityState !== "hidden";
-	}
-};
-var focusManager = new FocusManager();
-//#endregion
 //#region node_modules/@tanstack/query-core/build/modern/timeoutManager.js
 var defaultTimeoutProvider = {
 	setTimeout: (callback, delay) => setTimeout(callback, delay),
@@ -252,57 +178,6 @@ function addConsumeAwareSignal(object, getSignal, onCancelled) {
 	return object;
 }
 //#endregion
-//#region node_modules/@tanstack/query-core/build/modern/environmentManager.js
-var environmentManager = /* @__PURE__ */ (() => {
-	let isServerFn = () => isServer;
-	return {
-		/**
-		* Returns whether the current runtime should be treated as a server environment.
-		*/
-		isServer() {
-			return isServerFn();
-		},
-		/**
-		* Overrides the server check globally.
-		*/
-		setIsServer(isServerValue) {
-			isServerFn = isServerValue;
-		}
-	};
-})();
-//#endregion
-//#region node_modules/@tanstack/query-core/build/modern/thenable.js
-function pendingThenable() {
-	let resolve;
-	let reject;
-	const thenable = new Promise((_resolve, _reject) => {
-		resolve = _resolve;
-		reject = _reject;
-	});
-	thenable.status = "pending";
-	thenable.catch(() => {});
-	function finalize(data) {
-		Object.assign(thenable, data);
-		delete thenable.resolve;
-		delete thenable.reject;
-	}
-	thenable.resolve = (value) => {
-		finalize({
-			status: "fulfilled",
-			value
-		});
-		resolve(value);
-	};
-	thenable.reject = (reason) => {
-		finalize({
-			status: "rejected",
-			reason
-		});
-		reject(reason);
-	};
-	return thenable;
-}
-//#endregion
 //#region node_modules/@tanstack/query-core/build/modern/notifyManager.js
 var defaultScheduler = systemSetTimeoutZero;
 function createNotifyManager() {
@@ -376,6 +251,80 @@ function createNotifyManager() {
 }
 var notifyManager = createNotifyManager();
 //#endregion
+//#region node_modules/@tanstack/query-core/build/modern/subscribable.js
+var Subscribable = class {
+	constructor() {
+		this.listeners = /* @__PURE__ */ new Set();
+		this.subscribe = this.subscribe.bind(this);
+	}
+	subscribe(listener) {
+		this.listeners.add(listener);
+		this.onSubscribe();
+		return () => {
+			this.listeners.delete(listener);
+			this.onUnsubscribe();
+		};
+	}
+	hasListeners() {
+		return this.listeners.size > 0;
+	}
+	onSubscribe() {}
+	onUnsubscribe() {}
+};
+//#endregion
+//#region node_modules/@tanstack/query-core/build/modern/focusManager.js
+var FocusManager = class extends Subscribable {
+	#focused;
+	#cleanup;
+	#setup;
+	constructor() {
+		super();
+		this.#setup = (onFocus) => {
+			if (typeof window !== "undefined" && window.addEventListener) {
+				const listener = () => onFocus();
+				window.addEventListener("visibilitychange", listener, false);
+				return () => {
+					window.removeEventListener("visibilitychange", listener);
+				};
+			}
+		};
+	}
+	onSubscribe() {
+		if (!this.#cleanup) this.setEventListener(this.#setup);
+	}
+	onUnsubscribe() {
+		if (!this.hasListeners()) {
+			this.#cleanup?.();
+			this.#cleanup = void 0;
+		}
+	}
+	setEventListener(setup) {
+		this.#setup = setup;
+		this.#cleanup?.();
+		this.#cleanup = setup((focused) => {
+			if (typeof focused === "boolean") this.setFocused(focused);
+			else this.onFocus();
+		});
+	}
+	setFocused(focused) {
+		if (this.#focused !== focused) {
+			this.#focused = focused;
+			this.onFocus();
+		}
+	}
+	onFocus() {
+		const isFocused = this.isFocused();
+		this.listeners.forEach((listener) => {
+			listener(isFocused);
+		});
+	}
+	isFocused() {
+		if (typeof this.#focused === "boolean") return this.#focused;
+		return globalThis.document?.visibilityState !== "hidden";
+	}
+};
+var focusManager = new FocusManager();
+//#endregion
 //#region node_modules/@tanstack/query-core/build/modern/onlineManager.js
 var OnlineManager = class extends Subscribable {
 	#online = true;
@@ -423,6 +372,57 @@ var OnlineManager = class extends Subscribable {
 	}
 };
 var onlineManager = new OnlineManager();
+//#endregion
+//#region node_modules/@tanstack/query-core/build/modern/thenable.js
+function pendingThenable() {
+	let resolve;
+	let reject;
+	const thenable = new Promise((_resolve, _reject) => {
+		resolve = _resolve;
+		reject = _reject;
+	});
+	thenable.status = "pending";
+	thenable.catch(() => {});
+	function finalize(data) {
+		Object.assign(thenable, data);
+		delete thenable.resolve;
+		delete thenable.reject;
+	}
+	thenable.resolve = (value) => {
+		finalize({
+			status: "fulfilled",
+			value
+		});
+		resolve(value);
+	};
+	thenable.reject = (reason) => {
+		finalize({
+			status: "rejected",
+			reason
+		});
+		reject(reason);
+	};
+	return thenable;
+}
+//#endregion
+//#region node_modules/@tanstack/query-core/build/modern/environmentManager.js
+var environmentManager = /* @__PURE__ */ (() => {
+	let isServerFn = () => isServer;
+	return {
+		/**
+		* Returns whether the current runtime should be treated as a server environment.
+		*/
+		isServer() {
+			return isServerFn();
+		},
+		/**
+		* Overrides the server check globally.
+		*/
+		setIsServer(isServerValue) {
+			isServerFn = isServerValue;
+		}
+	};
+})();
 //#endregion
 //#region node_modules/@tanstack/query-core/build/modern/retryer.js
 function defaultRetryDelay(failureCount) {
@@ -553,8 +553,87 @@ var Removable = class {
 	}
 };
 //#endregion
+//#region node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
+function infiniteQueryBehavior(pages) {
+	return { onFetch: (context, query) => {
+		const options = context.options;
+		const direction = context.fetchOptions?.meta?.fetchMore?.direction;
+		const oldPages = context.state.data?.pages || [];
+		const oldPageParams = context.state.data?.pageParams || [];
+		let result = {
+			pages: [],
+			pageParams: []
+		};
+		let currentPage = 0;
+		const fetchFn = async () => {
+			let cancelled = false;
+			const addSignalProperty = (object) => {
+				addConsumeAwareSignal(object, () => context.signal, () => cancelled = true);
+			};
+			const queryFn = ensureQueryFn(context.options, context.fetchOptions);
+			const fetchPage = async (data, param, previous) => {
+				if (cancelled) return Promise.reject(context.signal.reason);
+				if (param == null && data.pages.length) return Promise.resolve(data);
+				const createQueryFnContext = () => {
+					const queryFnContext2 = {
+						client: context.client,
+						queryKey: context.queryKey,
+						pageParam: param,
+						direction: previous ? "backward" : "forward",
+						meta: context.options.meta
+					};
+					addSignalProperty(queryFnContext2);
+					return queryFnContext2;
+				};
+				const page = await queryFn(createQueryFnContext());
+				const { maxPages } = context.options;
+				const addTo = previous ? addToStart : addToEnd;
+				return {
+					pages: addTo(data.pages, page, maxPages),
+					pageParams: addTo(data.pageParams, param, maxPages)
+				};
+			};
+			if (direction && oldPages.length) {
+				const previous = direction === "backward";
+				const pageParamFn = previous ? getPreviousPageParam : getNextPageParam;
+				const oldData = {
+					pages: oldPages,
+					pageParams: oldPageParams
+				};
+				result = await fetchPage(oldData, pageParamFn(options, oldData), previous);
+			} else {
+				const remainingPages = pages ?? oldPages.length;
+				do {
+					const param = currentPage === 0 ? oldPageParams[0] ?? options.initialPageParam : getNextPageParam(options, result);
+					if (currentPage > 0 && param == null) break;
+					result = await fetchPage(result, param);
+					currentPage++;
+				} while (currentPage < remainingPages);
+			}
+			return result;
+		};
+		if (context.options.persister) context.fetchFn = () => {
+			return context.options.persister?.(fetchFn, {
+				client: context.client,
+				queryKey: context.queryKey,
+				meta: context.options.meta,
+				signal: context.signal
+			}, query);
+		};
+		else context.fetchFn = fetchFn;
+	} };
+}
+function getNextPageParam(options, { pages, pageParams }) {
+	const lastIndex = pages.length - 1;
+	return pages.length > 0 ? options.getNextPageParam(pages[lastIndex], pages, pageParams[lastIndex], pageParams) : void 0;
+}
+function getPreviousPageParam(options, { pages, pageParams }) {
+	return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
+}
+//#endregion
 //#region node_modules/@tanstack/query-core/build/modern/query.js
 var Query = class extends Removable {
+	#queryType;
 	#initialState;
 	#revertState;
 	#cache;
@@ -579,6 +658,9 @@ var Query = class extends Removable {
 	get meta() {
 		return this.options.meta;
 	}
+	get queryType() {
+		return this.#queryType;
+	}
 	get promise() {
 		return this.#retryer?.promise;
 	}
@@ -587,6 +669,7 @@ var Query = class extends Removable {
 			...this.#defaultOptions,
 			...options
 		};
+		if (options?._type) this.#queryType = options._type;
 		this.updateGcTime(this.options.gcTime);
 		if (this.state && this.state.data === void 0) {
 			const defaultState = getDefaultState$1(this.options);
@@ -609,11 +692,10 @@ var Query = class extends Removable {
 		});
 		return data;
 	}
-	setState(state, setStateOptions) {
+	setState(state) {
 		this.#dispatch({
 			type: "setState",
-			state,
-			setStateOptions
+			state
 		});
 	}
 	cancel(options) {
@@ -751,7 +833,7 @@ var Query = class extends Removable {
 			return context2;
 		};
 		const context = createFetchContext();
-		this.options.behavior?.onFetch(context, this);
+		(this.#queryType === "infinite" ? infiniteQueryBehavior(this.options.pages) : this.options.behavior)?.onFetch(context, this);
 		this.#revertState = this.state;
 		if (this.state.fetchStatus === "idle" || this.state.fetchMeta !== context.fetchOptions?.meta) this.#dispatch({
 			type: "fetch",
@@ -921,83 +1003,97 @@ function getDefaultState$1(options) {
 	};
 }
 //#endregion
-//#region node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
-function infiniteQueryBehavior(pages) {
-	return { onFetch: (context, query) => {
-		const options = context.options;
-		const direction = context.fetchOptions?.meta?.fetchMore?.direction;
-		const oldPages = context.state.data?.pages || [];
-		const oldPageParams = context.state.data?.pageParams || [];
-		let result = {
-			pages: [],
-			pageParams: []
+//#region node_modules/@tanstack/query-core/build/modern/queryCache.js
+var QueryCache = class extends Subscribable {
+	constructor(config = {}) {
+		super();
+		this.config = config;
+		this.#queries = /* @__PURE__ */ new Map();
+	}
+	#queries;
+	build(client, options, state) {
+		const queryKey = options.queryKey;
+		const queryHash = options.queryHash ?? hashQueryKeyByOptions(queryKey, options);
+		let query = this.get(queryHash);
+		if (!query) {
+			query = new Query({
+				client,
+				queryKey,
+				queryHash,
+				options: client.defaultQueryOptions(options),
+				state,
+				defaultOptions: client.getQueryDefaults(queryKey)
+			});
+			this.add(query);
+		}
+		return query;
+	}
+	add(query) {
+		if (!this.#queries.has(query.queryHash)) {
+			this.#queries.set(query.queryHash, query);
+			this.notify({
+				type: "added",
+				query
+			});
+		}
+	}
+	remove(query) {
+		const queryInMap = this.#queries.get(query.queryHash);
+		if (queryInMap) {
+			query.destroy();
+			if (queryInMap === query) this.#queries.delete(query.queryHash);
+			this.notify({
+				type: "removed",
+				query
+			});
+		}
+	}
+	clear() {
+		notifyManager.batch(() => {
+			this.getAll().forEach((query) => {
+				this.remove(query);
+			});
+		});
+	}
+	get(queryHash) {
+		return this.#queries.get(queryHash);
+	}
+	getAll() {
+		return [...this.#queries.values()];
+	}
+	find(filters) {
+		const defaultedFilters = {
+			exact: true,
+			...filters
 		};
-		let currentPage = 0;
-		const fetchFn = async () => {
-			let cancelled = false;
-			const addSignalProperty = (object) => {
-				addConsumeAwareSignal(object, () => context.signal, () => cancelled = true);
-			};
-			const queryFn = ensureQueryFn(context.options, context.fetchOptions);
-			const fetchPage = async (data, param, previous) => {
-				if (cancelled) return Promise.reject();
-				if (param == null && data.pages.length) return Promise.resolve(data);
-				const createQueryFnContext = () => {
-					const queryFnContext2 = {
-						client: context.client,
-						queryKey: context.queryKey,
-						pageParam: param,
-						direction: previous ? "backward" : "forward",
-						meta: context.options.meta
-					};
-					addSignalProperty(queryFnContext2);
-					return queryFnContext2;
-				};
-				const page = await queryFn(createQueryFnContext());
-				const { maxPages } = context.options;
-				const addTo = previous ? addToStart : addToEnd;
-				return {
-					pages: addTo(data.pages, page, maxPages),
-					pageParams: addTo(data.pageParams, param, maxPages)
-				};
-			};
-			if (direction && oldPages.length) {
-				const previous = direction === "backward";
-				const pageParamFn = previous ? getPreviousPageParam : getNextPageParam;
-				const oldData = {
-					pages: oldPages,
-					pageParams: oldPageParams
-				};
-				result = await fetchPage(oldData, pageParamFn(options, oldData), previous);
-			} else {
-				const remainingPages = pages ?? oldPages.length;
-				do {
-					const param = currentPage === 0 ? oldPageParams[0] ?? options.initialPageParam : getNextPageParam(options, result);
-					if (currentPage > 0 && param == null) break;
-					result = await fetchPage(result, param);
-					currentPage++;
-				} while (currentPage < remainingPages);
-			}
-			return result;
-		};
-		if (context.options.persister) context.fetchFn = () => {
-			return context.options.persister?.(fetchFn, {
-				client: context.client,
-				queryKey: context.queryKey,
-				meta: context.options.meta,
-				signal: context.signal
-			}, query);
-		};
-		else context.fetchFn = fetchFn;
-	} };
-}
-function getNextPageParam(options, { pages, pageParams }) {
-	const lastIndex = pages.length - 1;
-	return pages.length > 0 ? options.getNextPageParam(pages[lastIndex], pages, pageParams[lastIndex], pageParams) : void 0;
-}
-function getPreviousPageParam(options, { pages, pageParams }) {
-	return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
-}
+		return this.getAll().find((query) => matchQuery(defaultedFilters, query));
+	}
+	findAll(filters = {}) {
+		const queries = this.getAll();
+		return Object.keys(filters).length > 0 ? queries.filter((query) => matchQuery(filters, query)) : queries;
+	}
+	notify(event) {
+		notifyManager.batch(() => {
+			this.listeners.forEach((listener) => {
+				listener(event);
+			});
+		});
+	}
+	onFocus() {
+		notifyManager.batch(() => {
+			this.getAll().forEach((query) => {
+				query.onFocus();
+			});
+		});
+	}
+	onOnline() {
+		notifyManager.batch(() => {
+			this.getAll().forEach((query) => {
+				query.onOnline();
+			});
+		});
+	}
+};
 //#endregion
 //#region node_modules/@tanstack/query-core/build/modern/mutation.js
 var Mutation = class extends Removable {
@@ -1320,98 +1416,6 @@ function scopeFor(mutation) {
 	return mutation.options.scope?.id;
 }
 //#endregion
-//#region node_modules/@tanstack/query-core/build/modern/queryCache.js
-var QueryCache = class extends Subscribable {
-	constructor(config = {}) {
-		super();
-		this.config = config;
-		this.#queries = /* @__PURE__ */ new Map();
-	}
-	#queries;
-	build(client, options, state) {
-		const queryKey = options.queryKey;
-		const queryHash = options.queryHash ?? hashQueryKeyByOptions(queryKey, options);
-		let query = this.get(queryHash);
-		if (!query) {
-			query = new Query({
-				client,
-				queryKey,
-				queryHash,
-				options: client.defaultQueryOptions(options),
-				state,
-				defaultOptions: client.getQueryDefaults(queryKey)
-			});
-			this.add(query);
-		}
-		return query;
-	}
-	add(query) {
-		if (!this.#queries.has(query.queryHash)) {
-			this.#queries.set(query.queryHash, query);
-			this.notify({
-				type: "added",
-				query
-			});
-		}
-	}
-	remove(query) {
-		const queryInMap = this.#queries.get(query.queryHash);
-		if (queryInMap) {
-			query.destroy();
-			if (queryInMap === query) this.#queries.delete(query.queryHash);
-			this.notify({
-				type: "removed",
-				query
-			});
-		}
-	}
-	clear() {
-		notifyManager.batch(() => {
-			this.getAll().forEach((query) => {
-				this.remove(query);
-			});
-		});
-	}
-	get(queryHash) {
-		return this.#queries.get(queryHash);
-	}
-	getAll() {
-		return [...this.#queries.values()];
-	}
-	find(filters) {
-		const defaultedFilters = {
-			exact: true,
-			...filters
-		};
-		return this.getAll().find((query) => matchQuery(defaultedFilters, query));
-	}
-	findAll(filters = {}) {
-		const queries = this.getAll();
-		return Object.keys(filters).length > 0 ? queries.filter((query) => matchQuery(filters, query)) : queries;
-	}
-	notify(event) {
-		notifyManager.batch(() => {
-			this.listeners.forEach((listener) => {
-				listener(event);
-			});
-		});
-	}
-	onFocus() {
-		notifyManager.batch(() => {
-			this.getAll().forEach((query) => {
-				query.onFocus();
-			});
-		});
-	}
-	onOnline() {
-		notifyManager.batch(() => {
-			this.getAll().forEach((query) => {
-				query.onOnline();
-			});
-		});
-	}
-};
-//#endregion
 //#region node_modules/@tanstack/query-core/build/modern/queryClient.js
 var QueryClient = class {
 	#queryCache;
@@ -1569,14 +1573,14 @@ var QueryClient = class {
 		return this.fetchQuery(options).then(noop).catch(noop);
 	}
 	fetchInfiniteQuery(options) {
-		options.behavior = infiniteQueryBehavior(options.pages);
+		options._type = "infinite";
 		return this.fetchQuery(options);
 	}
 	prefetchInfiniteQuery(options) {
 		return this.fetchInfiniteQuery(options).then(noop).catch(noop);
 	}
 	ensureInfiniteQueryData(options) {
-		options.behavior = infiniteQueryBehavior(options.pages);
+		options._type = "infinite";
 		return this.ensureQueryData(options);
 	}
 	resumePausedMutations() {
