@@ -12,4 +12,14 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force the Nitro build target to Vercel so the deploy step emits a
+  // `.vercel/output` layout Vercel recognises (functions/ + static/). The
+  // default is `cloudflare-module`, which Vercel can't run — that's why
+  // every request was being rejected at the edge with a 404.
+  // Inside Lovable's sandbox this override is ignored (Lovable forces
+  // Cloudflare for its own host), but on a self-hosted Vercel build it
+  // pins the output correctly.
+  nitro: {
+    preset: "vercel",
+  },
 });
