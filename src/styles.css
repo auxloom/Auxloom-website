@@ -1,0 +1,142 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Oswald", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-pressure: "Roboto Flex", sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-glow: var(--navy-glow);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Deep navy theme */
+  --background: oklch(0.13 0.05 265);
+  --foreground: oklch(0.97 0.01 250);
+  --card: oklch(0.17 0.06 265);
+  --card-foreground: oklch(0.97 0.01 250);
+  --popover: oklch(0.17 0.06 265);
+  --popover-foreground: oklch(0.97 0.01 250);
+  --primary: oklch(0.55 0.22 260);
+  --primary-foreground: oklch(0.98 0.01 250);
+  --secondary: oklch(0.22 0.06 265);
+  --secondary-foreground: oklch(0.97 0.01 250);
+  --muted: oklch(0.22 0.05 265);
+  --muted-foreground: oklch(0.72 0.03 255);
+  --accent: oklch(0.5 0.2 260);
+  --accent-foreground: oklch(0.98 0.01 250);
+  --destructive: oklch(0.6 0.24 27);
+  --destructive-foreground: oklch(0.98 0.01 250);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0.22 260);
+
+  --navy: oklch(0.25 0.12 265);
+  --navy-deep: oklch(0.1 0.06 265);
+  --navy-glow: oklch(0.55 0.25 262);
+
+  --gradient-hero: radial-gradient(
+    1200px circle at var(--mx, 50%) var(--my, 50%),
+    oklch(0.45 0.28 262 / 0.7),
+    oklch(0.2 0.18 265 / 0.4) 35%,
+    oklch(0.08 0.05 265 / 0.95) 70%
+  );
+  --shadow-glow: 0 10px 60px -10px oklch(0.55 0.25 262 / 0.6);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    /* Smooth-scroll anchor jumps triggered by the Navbar's `#section` links. */
+    scroll-behavior: smooth;
+    /* Reserve space for the fixed glass pill so anchored section headings
+       land right under it. ~4.5rem = 72px clears the pill (positioned at
+       top-4 = 16px and ~52px tall on desktop). The section's own internal
+       top padding then adds the breathing room to its eyebrow. */
+    scroll-padding-top: 4.5rem;
+  }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Per-section scroll offset — needed for browsers that don't honour
+ * `scroll-padding-top` for non-root scroll containers, and to keep the
+ * behaviour explicit at the section level. */
+@layer base {
+  section[id] {
+    scroll-margin-top: 4.5rem;
+  }
+  /* Eyebrows are the actual scroll targets for navbar nav, so they need
+     their own scroll-margin to land cleanly just below the pill. */
+  [id^="eyebrow-"] {
+    scroll-margin-top: 5.5rem;
+  }
+}
+
+@utility glass-pill {
+  background-color: oklch(1 0 0 / 0.06);
+  border: 1px solid oklch(1 0 0 / 0.12);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 9999px;
+}
+
+@utility text-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+@utility hero-gradient {
+  background-image: var(--gradient-hero);
+  transition: background-position 0.2s ease;
+}
+
+/* Centre-darkening overlay for the LineWaves-backed hero — dims the area
+ * behind the headline + CTA so the foreground text stays readable while
+ * the wave pattern remains visible at the edges. */
+@utility hero-vignette {
+  background: radial-gradient(
+    ellipse 65% 55% at center,
+    rgba(8, 12, 40, 0.78) 0%,
+    rgba(8, 12, 40, 0.35) 45%,
+    transparent 75%
+  );
+}
