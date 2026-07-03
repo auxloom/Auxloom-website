@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
-import posts from "../../data/blogs_data.json";
+import posts from "@/data/blogs_data.json";
 
 interface BlogPost {
   eyebrow: string;

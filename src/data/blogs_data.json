@@ -1,0 +1,80 @@
+[
+  {
+    "eyebrow": "Engineering",
+    "title": "Designing MCP Servers for Production AI Workflows",
+    "excerpt": "A practical look at building Model Context Protocol servers that hold up under real load — schema versioning, tool-call retries, and graceful fallbacks when an upstream LLM misbehaves.",
+    "readTime": "7 min read",
+    "date": "May 2026",
+    "content": [
+      "The Model Context Protocol (MCP) has emerged as a key standard for connecting Large Language Models to real-world data sources and APIs. However, moving from a local sandbox to production-ready MCP setups brings a set of unique engineering hurdles.",
+      "First and foremost is protocol schema stability. When your LLM agents are executing tool calls dynamically, any schema mismatch or undefined parameter can cause the agent loop to crash or trigger hallucinations. In production, we recommend versioning all tool definitions and implementing strong JSON-Schema parsing wrappers around every handler.",
+      "Secondly, network resilience is paramount. Upstream API calls fail, LLMs fail to respond, and rate-limits are reached. A production MCP server must implement smart retry policies, token bucket rate-limiting, and standard fallback mechanisms. For example, if a database query times out, the MCP server should return a structured error description rather than throwing an unhandled exception.",
+      "Finally, observability cannot be ignored. Every tool call, prompt template hydration, and resource request should be logged with unique tracing identifiers. This allows you to reconstruct the exact decision trajectory of your AI agents when diagnosing issues."
+    ]
+  },
+  {
+    "eyebrow": "AI",
+    "title": "When to Reach for an Agent — and When Not To",
+    "excerpt": "Agentic loops are tempting, but most production AI problems collapse into a well-scoped retrieval + structured-output pipeline. Here's the decision rubric we use at Auxloom before we commit.",
+    "readTime": "5 min read",
+    "date": "April 2026",
+    "content": [
+      "AI agents with autonomous decision loops and multi-step tool execution are highly appealing to write. However, in production systems, unpredictability and high latency can quickly turn agentic designs into liabilities.",
+      "At Auxloom, we follow a simple rubric before committing to an agentic architecture. Most business processes are highly structured and don't need general autonomous planning. Instead, they collapse into deterministic pipelines using structured outputs (JSON schemas) and retrieval-augmented generation (RAG).",
+      "For instance, if your system needs to parse an email, fetch customer details from a database, and generate a draft response, a structured pipeline is faster, cheaper, and 100% reliable compared to letting an agent decide what steps to take. We only choose autonomous agents when the tool execution path is highly dynamic and cannot be predicted at compile time.",
+      "By keeping your AI logic as deterministic as possible, you minimize latency, save API costs, and build a system that is far easier to test and maintain."
+    ]
+  },
+  {
+    "eyebrow": "Automation",
+    "title": "SaaS Modernisation Without the Rewrite",
+    "excerpt": "You don't need to throw the legacy stack away to ship AI features. We walk through the strangler-fig pattern we used to layer an intelligent automation layer on top of a 9-year-old SaaS product.",
+    "readTime": "9 min read",
+    "date": "March 2026",
+    "content": [
+      "Rewriting legacy SaaS applications from scratch is a high-risk gamble that rarely pays off on schedule. Fortunately, layering intelligent AI features and automated workflows on top of existing applications is entirely viable using the Strangler-Fig pattern.",
+      "The Strangler-Fig pattern allows you to gradually replace or augment parts of your legacy system by building new services around the perimeter of the monolith, routing traffic dynamically based on target rules.",
+      "At Auxloom, we implemented this for a 9-year-old legacy CRM. Instead of refactoring their complex SQL queries and outdated frontends, we built an automation proxy layer. This proxy intercept database writes and routes them to serverless automation routines that invoke AI models, update external services, and write back results via standard APIs.",
+      "This approach allowed us to deploy advanced automated task scheduling and intelligent lead scoring in less than four weeks, with zero downtime and absolutely no changes to the core legacy codebase."
+    ]
+  },
+  {
+    "eyebrow": "Automation",
+    "title": "SaaS Modernisation Without the Rewrite",
+    "excerpt": "You don't need to throw the legacy stack away to ship AI features. We walk through the strangler-fig pattern we used to layer an intelligent automation layer on top of a 9-year-old SaaS product.",
+    "readTime": "9 min read",
+    "date": "March 2026",
+    "content": [
+      "Rewriting legacy SaaS applications from scratch is a high-risk gamble that rarely pays off on schedule. Fortunately, layering intelligent AI features and automated workflows on top of existing applications is entirely viable using the Strangler-Fig pattern.",
+      "The Strangler-Fig pattern allows you to gradually replace or augment parts of your legacy system by building new services around the perimeter of the monolith, routing traffic dynamically based on target rules.",
+      "At Auxloom, we implemented this for a 9-year-old legacy CRM. Instead of refactoring their complex SQL queries and outdated frontends, we built an automation proxy layer. This proxy intercept database writes and routes them to serverless automation routines that invoke AI models, update external services, and write back results via standard APIs.",
+      "This approach allowed us to deploy advanced automated task scheduling and intelligent lead scoring in less than four weeks, with zero downtime and absolutely no changes to the core legacy codebase."
+    ]
+  },
+  {
+    "eyebrow": "AI",
+    "title": "When to Reach for an Agent — and When Not To",
+    "excerpt": "Agentic loops are tempting, but most production AI problems collapse into a well-scoped retrieval + structured-output pipeline. Here's the decision rubric we use at Auxloom before we commit.",
+    "readTime": "5 min read",
+    "date": "April 2026",
+    "content": [
+      "AI agents with autonomous decision loops and multi-step tool execution are highly appealing to write. However, in production systems, unpredictability and high latency can quickly turn agentic designs into liabilities.",
+      "At Auxloom, we follow a simple rubric before committing to an agentic architecture. Most business processes are highly structured and don't need general autonomous planning. Instead, they collapse into deterministic pipelines using structured outputs (JSON schemas) and retrieval-augmented generation (RAG).",
+      "For instance, if your system needs to parse an email, fetch customer details from a database, and generate a draft response, a structured pipeline is faster, cheaper, and 100% reliable compared to letting an agent decide what steps to take. We only choose autonomous agents when the tool execution path is highly dynamic and cannot be predicted at compile time.",
+      "By keeping your AI logic as deterministic as possible, you minimize latency, save API costs, and build a system that is far easier to test and maintain."
+    ]
+  },
+  {
+    "eyebrow": "Engineering",
+    "title": "Designing MCP Servers for Production AI Workflows",
+    "excerpt": "A practical look at building Model Context Protocol servers that hold up under real load — schema versioning, tool-call retries, and graceful fallbacks when an upstream LLM misbehaves.",
+    "readTime": "7 min read",
+    "date": "May 2026",
+    "content": [
+      "The Model Context Protocol (MCP) has emerged as a key standard for connecting Large Language Models to real-world data sources and APIs. However, moving from a local sandbox to production-ready MCP setups brings a set of unique engineering hurdles.",
+      "First and foremost is protocol schema stability. When your LLM agents are executing tool calls dynamically, any schema mismatch or undefined parameter can cause the agent loop to crash or trigger hallucinations. In production, we recommend versioning all tool definitions and implementing strong JSON-Schema parsing wrappers around every handler.",
+      "Secondly, network resilience is paramount. Upstream API calls fail, LLMs fail to respond, and rate-limits are reached. A production MCP server must implement smart retry policies, token bucket rate-limiting, and standard fallback mechanisms. For example, if a database query times out, the MCP server should return a structured error description rather than throwing an unhandled exception.",
+      "Finally, observability cannot be ignored. Every tool call, prompt template hydration, and resource request should be logged with unique tracing identifiers. This allows you to reconstruct the exact decision trajectory of your AI agents when diagnosing issues."
+    ]
+  }
+]
