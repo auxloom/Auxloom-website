@@ -31,9 +31,6 @@ export default defineConfig(async ({ command }) => {
   }
 
   return {
-    css: {
-      transformer: "lightningcss",
-    },
     resolve: {
       alias: {
         "@": path.resolve(process.cwd(), "./src"),
