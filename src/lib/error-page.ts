@@ -1,4 +1,4 @@
-export function renderErrorPage(): string {
+export function renderErrorPage(error?: any): string {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -20,6 +20,7 @@ export function renderErrorPage(): string {
     <div class="card">
       <h1>This page didn't load</h1>
       <p>Something went wrong on our end. You can try refreshing or head back home.</p>
+      ${error ? `<pre style="margin-top: 1.5rem; text-align: left; background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.375rem; font-size: 11px; font-family: monospace; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all;">${error.name || 'Error'}: ${error.message || String(error)}\n\n${error.stack || ''}</pre>` : ''}
       <div class="actions">
         <button class="primary" onclick="location.reload()">Try again</button>
         <a class="secondary" href="/">Go home</a>
