@@ -19,11 +19,7 @@ export default defineConfig(async ({ command }) => {
       },
       server: { entry: "server" },
     }),
-    react({
-      babel: {
-        plugins: [["babel-plugin-react-compiler", {}]],
-      },
-    }),
+    react(),
   ];
   if (command === "build") {
     const { nitro } = await import("nitro/vite");
