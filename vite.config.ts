@@ -25,7 +25,6 @@ export default defineConfig(async ({ command }) => {
       },
     }),
   ];
-
   if (command === "build") {
     const { nitro } = await import("nitro/vite");
     plugins.push(
