@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
-import BookMeetingModal from "./BookMeetingModal";
-import ContactModal from "./ContactModal";
+import BookMeetingModal from "../ui/BookMeetingModal";
+import ContactModal from "../ui/ContactModal";
 
 interface ModalContextType {
   isBookingOpen: boolean;

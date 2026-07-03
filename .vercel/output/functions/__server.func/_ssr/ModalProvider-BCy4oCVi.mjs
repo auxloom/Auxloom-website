@@ -4,7 +4,7 @@ import { n as stringType, t as objectType } from "../_libs/zod.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as AnimatePresence } from "../_libs/framer-motion.mjs";
 import { t as motion } from "../_libs/motion.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/ModalProvider-ixUKh8ju.js
+//#region node_modules/.nitro/vite/services/ssr/assets/ModalProvider-BCy4oCVi.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var createSsrRpc = (functionId) => {

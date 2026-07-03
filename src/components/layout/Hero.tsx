@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
-import BlurText from "./BlurText";
-import LineWaves from "./LineWaves";
+import BlurText from "../ui/BlurText";
+import LineWaves from "../ui/LineWaves";
 
 export default function Hero() {
   return (

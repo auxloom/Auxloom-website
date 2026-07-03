@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { useModals } from "./ModalProvider";
+import { useModals } from "../providers/ModalProvider";
 import s1 from "@/assets/service 1.png";
 import s2 from "@/assets/service 2.png";
 import s3 from "@/assets/service 3.png";

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useModals } from "./ModalProvider";
+import { useModals } from "../providers/ModalProvider";
 
 const links = [
   // Hrefs point at the per-section eyebrow elements (not the section

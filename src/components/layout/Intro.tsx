@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import BlurText from "./BlurText";
+import BlurText from "../ui/BlurText";
 
 export default function Intro() {
   return (

@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Cursor from "@/components/Cursor";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Intro from "@/components/Intro";
-import Services from "@/components/Services";
-import Projects from "@/components/Projects";
-import Blogs from "@/components/Blogs";
-import Footer from "@/components/Footer";
+import Cursor from "@/components/ui/Cursor";
+import Navbar from "@/components/layout/Navbar";
+import Hero from "@/components/layout/Hero";
+import Intro from "@/components/layout/Intro";
+import Services from "@/components/layout/Services";
+import Projects from "@/components/layout/Projects";
+import Blogs from "@/components/layout/Blogs";
+import Footer from "@/components/layout/Footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({

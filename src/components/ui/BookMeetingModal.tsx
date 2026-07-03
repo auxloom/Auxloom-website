@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useModals } from "./ModalProvider";
-import { submitBooking } from "../lib/actions";
+import { useModals } from "../providers/ModalProvider";
+import { submitBooking } from "../../lib/actions";
 
 export default function BookMeetingModal() {
   const { isBookingOpen, closeBooking, selectedService } = useModals();

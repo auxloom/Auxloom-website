@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import PressureBand from "./PressureBand";
-import { useModals } from "./ModalProvider";
+import { useModals } from "../providers/ModalProvider";
 
 const cols = [
   {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useModals } from "./ModalProvider";
+import { useModals } from "../providers/ModalProvider";
 
 export default function ContactModal() {
   const { isContactOpen, closeContact } = useModals();

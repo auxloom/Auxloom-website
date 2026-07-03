@@ -1,4 +1,4 @@
-import TextPressure from "./TextPressure";
+import TextPressure from "../ui/TextPressure";
 
 export default function PressureBand() {
   return (
