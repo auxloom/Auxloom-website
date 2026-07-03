@@ -53,7 +53,7 @@ function renderErrorPage() {
 }
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-D5S72HkH.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-23Fj77--.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -67,16 +67,18 @@ async function normalizeCatastrophicSsrResponse(response) {
 		headers: { "content-type": "text/html; charset=utf-8" }
 	});
 }
-var server_default = { async fetch(request, env, ctx) {
-	try {
-		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
-	} catch (error) {
-		console.error(error);
-		return new Response(renderErrorPage(), {
-			status: 500,
-			headers: { "content-type": "text/html; charset=utf-8" }
-		});
+var server_default = {
+	async fetch(request, env, ctx) {
+		try {
+			return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
+		} catch (error) {
+			console.error(error);
+			return new Response(renderErrorPage(), {
+				status: 500,
+				headers: { "content-type": "text/html; charset=utf-8" }
+			});
+		}
 	}
-} };
+};
 //#endregion
 export { server_default as default, renderErrorPage as t };
